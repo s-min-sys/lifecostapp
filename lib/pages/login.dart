@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:lifecostapp/components/global.dart';
 import 'package:lifecostapp/components/model.dart';
@@ -22,6 +24,8 @@ class _LoginPageState extends State<LoginPage> {
     DioUtils.requestHttp('/base-infos', method: DioUtils.getMethod,
         onSuccess: (data) {
       Global.baseInfo = BaseInfo.fromJson(data);
+
+      print(jsonEncode(Global.baseInfo));
 
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(

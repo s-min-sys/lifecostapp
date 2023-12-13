@@ -14,6 +14,13 @@ class IDName {
   factory IDName.empty() {
     return const IDName(id: '', name: '');
   }
+
+  Map toJson() {
+    Map map = {};
+    map["id"] = id;
+    map["name"] = name;
+    return map;
+  }
 }
 
 class MerchantWallets {
@@ -43,6 +50,16 @@ class MerchantWallets {
     return const MerchantWallets(
         personID: '', personName: '', costDir: 0, wallets: []);
   }
+
+  Map toJson() {
+    Map map = {};
+    map["personID"] = personID;
+    map["personName"] = personName;
+    map["costDir"] = costDir;
+    map["wallets"] = wallets;
+
+    return map;
+  }
 }
 
 class BaseInfo {
@@ -67,5 +84,15 @@ class BaseInfo {
       labels: (json['labels'] as List).map((e) => IDName.fromJson(e)).toList(),
       groups: (json['groups'] as List).map((e) => IDName.fromJson(e)).toList(),
     );
+  }
+
+  Map toJson() {
+    Map map = {};
+    map["merchantWallets"] = merchantWallets;
+    map["selfWallets"] = selfWallets;
+    map["labels"] = labels;
+    map["groups"] = groups;
+
+    return map;
   }
 }
