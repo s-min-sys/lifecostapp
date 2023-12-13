@@ -5,7 +5,7 @@ import 'package:lifecostapp/components/global.dart';
 import 'package:lifecostapp/components/model.dart';
 import 'package:lifecostapp/helper/alert.dart';
 import 'package:lifecostapp/helper/dioutils.dart';
-import 'package:lifecostapp/pages/home.dart';
+import 'package:lifecostapp/pages/record.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
@@ -28,11 +28,16 @@ class _LoginPageState extends State<LoginPage> {
       print(jsonEncode(Global.baseInfo));
 
       Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const RecordPage()),
+          (route) => false);
+/*
+      Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
               builder: (context) => const HomePage(
                     title: '生活消费',
                   )),
           (route) => false);
+          */
     }, onError: (error) {
       AlertUtils.alertDialog(context: context, content: error)
           .then((value) => {print(value)});

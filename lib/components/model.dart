@@ -21,6 +21,10 @@ class IDName {
     map["name"] = name;
     return map;
   }
+
+  String toNameD() {
+    return name;
+  }
 }
 
 class MerchantWallets {
@@ -60,6 +64,47 @@ class MerchantWallets {
 
     return map;
   }
+
+  List toNameD() {
+    List l = [];
+    for (int idx = 0; idx < wallets.length; idx++) {
+      l.add(wallets[idx].name);
+    }
+
+    return l;
+  }
+
+  List toIDD() {
+    List l = [];
+    for (int idx = 0; idx < wallets.length; idx++) {
+      l.add(wallets[idx].id);
+    }
+
+    return l;
+  }
+}
+
+class PickerData {
+  final Map ids;
+  final Map names;
+  List<int> selected;
+
+  PickerData(this.ids, this.names, this.selected);
+
+  List? getSelectedNames() {
+    if (names.isEmpty) {
+      return null;
+    }
+
+    if (selected.isEmpty) {
+      selected = [0, 0];
+    }
+
+    return [
+      names.keys.elementAt(selected[0]),
+      names.values.elementAt(selected[0])[selected]
+    ];
+  }
 }
 
 class BaseInfo {
@@ -94,5 +139,38 @@ class BaseInfo {
     map["groups"] = groups;
 
     return map;
+  }
+
+  PickerData toPickerData(bool fromRequest) {
+    Map idM = {}, nameM = {};
+    List<int> selected = [];
+
+    for (int idx = 0; idx < merchantWallets.length; idx++) {
+      if (fromRequest) {
+        if (merchantWallets[idx].costDir == 2) {
+          continue;
+        }
+      } else {
+        if (merchantWallets[idx].costDir == 3) {
+          continue;
+        }
+      }
+
+      idM[merchantWallets[idx].personID] = merchantWallets[idx].toIDD();
+      nameM[merchantWallets[idx].personName] = merchantWallets[idx].toNameD();
+    }
+
+    idM[selfWallets.personID] = selfWallets.toIDD();
+    nameM[selfWallets.personName] = selfWallets.toNameD();
+
+    if (fromRequest) {
+      selected = [idM.length - 1, 0];
+    } else {
+      //return (fromPickerData.names.values.elementAt(fromPickerData.selected[0])
+      //as List)[fromPickerData.selected[1]];
+      selected = [0, 0];
+    }
+
+    return PickerData(idM, nameM, selected);
   }
 }
