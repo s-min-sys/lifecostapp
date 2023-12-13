@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:lifecostapp/components/global.dart';
+import 'package:lifecostapp/components/model.dart';
+import 'package:lifecostapp/helper/alert.dart';
+import 'package:lifecostapp/helper/dioutils.dart';
 import 'package:lifecostapp/pages/home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,6 +15,34 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   int mode = 1; // 1: login; 2: register;
+  final userNameController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  void doGetBaseInfos() {
+    DioUtils.requestHttp('/base-infos', method: DioUtils.getMethod,
+        onSuccess: (data) {
+      Global.baseInfo = BaseInfo.fromJson(data);
+
+      Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+              builder: (context) => const HomePage(
+                    title: '生活消费',
+                  )),
+          (route) => false);
+    }, onError: (error) {
+      AlertUtils.alertDialog(context: context, content: error)
+          .then((value) => {print(value)});
+    });
+  }
+
+  @override
+  void initState() {
+    SharedPreferences.getInstance().then((sp) => {
+          if (sp.containsKey('token'))
+            {DioUtils.reset(sp.getString('token')), doGetBaseInfos()}
+        });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,26 +63,28 @@ class _LoginPageState extends State<LoginPage> {
                     child: Image.asset('asset/images/logo.png')),
               ),
             ),
-            const Padding(
+            Padding(
               //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               child: TextField(
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'UserName',
                     hintText: 'Enter valid user name'),
+                controller: userNameController,
               ),
             ),
-            const Padding(
-              padding:
-                  EdgeInsets.only(left: 15.0, right: 15.0, top: 15, bottom: 0),
+            Padding(
+              padding: const EdgeInsets.only(
+                  left: 15.0, right: 15.0, top: 15, bottom: 0),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
                 obscureText: true,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Password',
                     hintText: 'Enter secure password'),
+                controller: passwordController,
               ),
             ),
             Row(mainAxisAlignment: MainAxisAlignment.end, children: [
@@ -87,12 +122,22 @@ class _LoginPageState extends State<LoginPage> {
                   color: Colors.blue, borderRadius: BorderRadius.circular(20)),
               child: TextButton(
                 onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const HomePage(
-                                title: '生活消费',
-                              )));
+                  if (mode == 1) {
+                    DioUtils.requestHttp('/login',
+                        method: DioUtils.postMethod,
+                        data: {
+                          'userName': userNameController.text,
+                          'password': passwordController.text
+                        }, onSuccess: (data) {
+                      SharedPreferences.getInstance()
+                          .then((sp) => {sp.setString('token', data['token'])});
+                      DioUtils.reset(data['token']);
+                      doGetBaseInfos();
+                    }, onError: (error) {
+                      AlertUtils.alertDialog(context: context, content: error)
+                          .then((value) => {print(value)});
+                    });
+                  } else {}
                 },
                 child: Text(
                   mode == 1 ? 'Login' : 'register',
