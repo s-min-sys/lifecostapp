@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class DioUtils {
   /// global dio object
@@ -20,7 +21,7 @@ class DioUtils {
             // 不使用http状态码判断状态，使用AdapterInterceptor来处理（适用于标准REST风格）
             return true;
           },
-          baseUrl: 'http://127.0.0.1:10000',
+          baseUrl: dotenv.env['SERVER_DOMAIN_DEV'] ?? '',
           headers: httpHeaders);
 
       dio = Dio(options);
