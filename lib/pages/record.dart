@@ -42,7 +42,13 @@ class _RecordPageState extends State<RecordPage> {
   }
 
   void doRecord() {
-    var price = int.parse(priceController.text);
+    var price = 0;
+
+    try {
+      price = (double.parse(priceController.text) * 100).toInt();
+      // ignore: empty_catches
+    } catch (e) {}
+
     if (price <= 0) {
       AlertUtils.alertDialog(context: context, content: "木有填写正确的价格");
 
@@ -82,13 +88,12 @@ class _RecordPageState extends State<RecordPage> {
       'fromSubWalletID': fromWalletID,
       'toSubWalletID': toWalletID,
       'amount': price,
-      'at': curAt.millisecondsSinceEpoch / 1000,
+      'at': (curAt.millisecondsSinceEpoch / 1000).round(),
     }, onSuccess: (data) {
       AlertUtils.alertDialog(context: context, content: "记录成功，是否关闭")
           .then((value) => {if (value == 'ok') Navigator.pop(context)});
     }, onError: (error) {
-      AlertUtils.alertDialog(context: context, content: error)
-          .then((value) => {if (value == 'ok') Navigator.pop(context)});
+      AlertUtils.alertDialog(context: context, content: error);
     });
   }
 
