@@ -16,6 +16,7 @@ class DioUtils {
       var options = BaseOptions(
           connectTimeout: const Duration(seconds: 15),
           receiveTimeout: const Duration(seconds: 15),
+          sendTimeout: const Duration(seconds: 15),
           responseType: ResponseType.json,
           validateStatus: (status) {
             // 不使用http状态码判断状态，使用AdapterInterceptor来处理（适用于标准REST风格）

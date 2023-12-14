@@ -1,9 +1,16 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_pickers/pickers.dart';
 import 'package:flutter_pickers/style/default_style.dart';
+import 'package:flutter_pickers/time_picker/model/date_mode.dart';
+import 'package:flutter_pickers/time_picker/model/date_type.dart';
+import 'package:flutter_pickers/time_picker/model/pduration.dart';
 import 'package:lifecostapp/components/global.dart';
 import 'package:lifecostapp/components/model.dart';
+import 'package:lifecostapp/helper/alert.dart';
+import 'package:lifecostapp/helper/dioutils.dart';
 
 class RecordPage extends StatefulWidget {
   const RecordPage({super.key});
@@ -17,6 +24,7 @@ class _RecordPageState extends State<RecordPage> {
   List<int> fromPosition = [], toPostions = [];
   final priceController = TextEditingController();
   late FocusNode myFocusNode;
+  PDuration at = PDuration.now();
 
   @override
   void initState() {
@@ -31,6 +39,54 @@ class _RecordPageState extends State<RecordPage> {
     myFocusNode.dispose();
 
     super.dispose();
+  }
+
+  void doRecord() {
+    var price = int.parse(priceController.text);
+    if (price <= 0) {
+      AlertUtils.alertDialog(context: context, content: "木有填写正确的价格");
+
+      return;
+    }
+
+    var pickerData = fromPickerData;
+
+    if (pickerData == null || pickerData.ids.isEmpty) {
+      AlertUtils.alertDialog(context: context, content: "没选择来源");
+
+      return;
+    }
+
+    var fromWalletID = pickerData.ids.values
+        .elementAt(pickerData.selected[0])[pickerData.selected[1]];
+
+    pickerData = toPickerData;
+    if (pickerData == null || pickerData.ids.isEmpty) {
+      AlertUtils.alertDialog(context: context, content: "没选择去向");
+
+      return;
+    }
+
+    var toWalletID = pickerData.ids.values
+        .elementAt(pickerData.selected[0])[pickerData.selected[1]];
+
+    DateTime curAt = DateTime(
+        at.getSingle(DateType.Year),
+        at.getSingle(DateType.Month),
+        at.getSingle(DateType.Day),
+        at.getSingle(DateType.Hour),
+        at.getSingle(DateType.Minute),
+        at.getSingle(DateType.Second));
+
+    DioUtils.requestHttp('/record', method: DioUtils.postMethod, data: {
+      'fromSubWalletID': fromWalletID,
+      'toSubWalletID': toWalletID,
+      'amount': price,
+      'at': curAt.millisecondsSinceEpoch / 1000,
+    }, onSuccess: (data) {
+      AlertUtils.alertDialog(context: context, content: "记录成功，是否关闭")
+          .then((value) => {if (value == 'ok') Navigator.pop(context)});
+    }, onError: (error) {});
   }
 
   List<String> fromSelectText() {
@@ -83,6 +139,18 @@ class _RecordPageState extends State<RecordPage> {
     ];
   }
 
+  void _datePicker() {
+    Pickers.showDatePicker(context,
+        mode: DateMode.YMDHMS, selectDate: PDuration.now(), onConfirm: (p) {
+      setState(() {
+        at = p;
+      });
+      myFocusNode.requestFocus();
+    }, onCancel: (bool isCancel) {
+      myFocusNode.requestFocus();
+    });
+  }
+
   void _showPicker(bool fromRequest) {
     var baseInfo = Global.baseInfo;
     if (baseInfo == null) {
@@ -127,6 +195,14 @@ class _RecordPageState extends State<RecordPage> {
   Widget build(BuildContext context) {
     var from = fromSelectText();
     var to = toSelectText();
+
+    DateTime curAt = DateTime(
+        at.getSingle(DateType.Year),
+        at.getSingle(DateType.Month),
+        at.getSingle(DateType.Day),
+        at.getSingle(DateType.Hour),
+        at.getSingle(DateType.Minute),
+        at.getSingle(DateType.Second));
 
     return Scaffold(
       appBar: AppBar(
@@ -206,7 +282,9 @@ class _RecordPageState extends State<RecordPage> {
                           borderRadius: BorderRadius.circular(25),
                         ),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        doRecord();
+                      },
                       child: const Row(children: [
                         SizedBox(
                           width: 40,
@@ -221,6 +299,23 @@ class _RecordPageState extends State<RecordPage> {
                         Icon(Icons.arrow_forward),
                       ]),
                     ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      foregroundColor: Colors.grey,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(0.0),
+                      ),
+                    ),
+                    onPressed: () {
+                      _datePicker();
+                    },
+                    child: Text(curAt.toString()),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.more_horiz, size: 24),
+                    onPressed: () {},
                   ),
                 ],
               ),

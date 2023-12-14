@@ -102,7 +102,7 @@ class PickerData {
 
     return [
       names.keys.elementAt(selected[0]),
-      names.values.elementAt(selected[0])[selected]
+      names.values.elementAt(selected[0])[selected[1]]
     ];
   }
 }
