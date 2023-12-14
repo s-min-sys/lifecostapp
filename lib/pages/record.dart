@@ -10,7 +10,7 @@ import 'package:flutter_pickers/time_picker/model/pduration.dart';
 import 'package:lifecostapp/components/global.dart';
 import 'package:lifecostapp/components/model.dart';
 import 'package:lifecostapp/helper/alert.dart';
-import 'package:lifecostapp/helper/dioutils.dart';
+import 'package:lifecostapp/helper/netutils.dart';
 
 class RecordPage extends StatefulWidget {
   const RecordPage({super.key});
@@ -78,7 +78,7 @@ class _RecordPageState extends State<RecordPage> {
         at.getSingle(DateType.Minute),
         at.getSingle(DateType.Second));
 
-    DioUtils.requestHttp('/record', method: DioUtils.postMethod, data: {
+    NetUtils.requestHttp('/record', method: NetUtils.postMethod, data: {
       'fromSubWalletID': fromWalletID,
       'toSubWalletID': toWalletID,
       'amount': price,
@@ -86,7 +86,10 @@ class _RecordPageState extends State<RecordPage> {
     }, onSuccess: (data) {
       AlertUtils.alertDialog(context: context, content: "记录成功，是否关闭")
           .then((value) => {if (value == 'ok') Navigator.pop(context)});
-    }, onError: (error) {});
+    }, onError: (error) {
+      AlertUtils.alertDialog(context: context, content: error)
+          .then((value) => {if (value == 'ok') Navigator.pop(context)});
+    });
   }
 
   List<String> fromSelectText() {

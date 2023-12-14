@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lifecostapp/components/global.dart';
 import 'package:lifecostapp/components/model.dart';
 import 'package:lifecostapp/helper/alert.dart';
-import 'package:lifecostapp/helper/dioutils.dart';
+import 'package:lifecostapp/helper/netutils.dart';
 import 'package:lifecostapp/pages/record.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,7 +21,7 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   void doGetBaseInfos() {
-    DioUtils.requestHttp('/base-infos', method: DioUtils.getMethod,
+    NetUtils.requestHttp('/base-infos', method: NetUtils.getMethod,
         onSuccess: (data) {
       Global.baseInfo = BaseInfo.fromJson(data);
 
@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     SharedPreferences.getInstance().then((sp) => {
           if (sp.containsKey('token'))
-            {DioUtils.reset(sp.getString('token')), doGetBaseInfos()}
+            {NetUtils.reset(sp.getString('token')), doGetBaseInfos()}
         });
     super.initState();
   }
@@ -132,15 +132,15 @@ class _LoginPageState extends State<LoginPage> {
               child: TextButton(
                 onPressed: () {
                   if (mode == 1) {
-                    DioUtils.requestHttp('/login',
-                        method: DioUtils.postMethod,
+                    NetUtils.requestHttp('/login',
+                        method: NetUtils.postMethod,
                         data: {
                           'userName': userNameController.text,
                           'password': passwordController.text
                         }, onSuccess: (data) {
                       SharedPreferences.getInstance()
                           .then((sp) => {sp.setString('token', data['token'])});
-                      DioUtils.reset(data['token']);
+                      NetUtils.reset(data['token']);
                       doGetBaseInfos();
                     }, onError: (error) {
                       AlertUtils.alertDialog(context: context, content: error)
