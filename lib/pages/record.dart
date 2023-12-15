@@ -90,8 +90,10 @@ class _RecordPageState extends State<RecordPage> {
       'amount': price,
       'at': (curAt.millisecondsSinceEpoch / 1000).round(),
     }, onSuccess: (data) {
-      AlertUtils.alertDialog(context: context, content: "记录成功，是否关闭")
-          .then((value) => {if (value == 'ok') Navigator.pop(context)});
+      AlertUtils.alertDialog(
+        context: context,
+        content: "记录成功，是否关闭",
+      ).then((value) => {if (value == 'ok') Navigator.pop(context)});
     }, onError: (error) {
       AlertUtils.alertDialog(context: context, content: error);
     });
@@ -184,7 +186,7 @@ class _RecordPageState extends State<RecordPage> {
         pickerStyle: DefaultPickerStyle(),
         data: pickerData.names,
         selectData: pickerData.getSelectedNames(),
-        columeNum: 5,
+        columeNum: 2,
         suffix: ['', '', '', '', ''], onConfirm: (List p, List<int> position) {
       setState(() {
         if (fromRequest) {
@@ -218,9 +220,9 @@ class _RecordPageState extends State<RecordPage> {
         title: const Text('记录'),
       ),
       body: Center(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 _showPicker(true);
@@ -258,75 +260,48 @@ class _RecordPageState extends State<RecordPage> {
                 ),
               ),
             ),
+            const Icon(
+              Icons.arrow_downward,
+              color: Colors.pink,
+              size: 24.0,
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                      width: 200,
-                      child: TextField(
-                        autofocus: true,
-                        focusNode: myFocusNode,
-                        decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.money),
-                            border: OutlineInputBorder(),
-                            labelText: '金额(元)',
-                            hintText: '输入金额'),
-                        inputFormatters: [
-                          FilteringTextInputFormatter(RegExp("[0-9.]"),
-                              allow: true),
-                        ],
-                        controller: priceController,
-                      )),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        //elevation: 0,
-                        foregroundColor: Colors.red,
-                        //change text color of button
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                      ),
-                      onPressed: () {
-                        doRecord();
-                      },
-                      child: const Row(children: [
-                        SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                            ),
-                          ),
-                        ),
-                        Icon(Icons.arrow_forward),
-                      ]),
-                    ),
-                  ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      foregroundColor: Colors.grey,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(0.0),
-                      ),
-                    ),
-                    onPressed: () {
-                      _datePicker();
-                    },
-                    child: Text(curAt.toString()),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.more_horiz, size: 24),
-                    onPressed: () {},
-                  ),
+              child: TextField(
+                autofocus: true,
+                focusNode: myFocusNode,
+                decoration: const InputDecoration(
+                    prefixIcon: Icon(Icons.money),
+                    border: OutlineInputBorder(),
+                    labelText: '金额(元)',
+                    hintText: '输入金额'),
+                inputFormatters: [
+                  FilteringTextInputFormatter(RegExp("[0-9.]"), allow: true),
                 ],
+                controller: priceController,
               ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                foregroundColor: Colors.grey,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(0.0),
+                ),
+              ),
+              onPressed: () {
+                _datePicker();
+              },
+              child: Text(curAt.toString()),
+            ),
+            IconButton(
+              icon: const Icon(Icons.more_horiz, size: 24),
+              onPressed: () {},
+            ),
+            const Icon(
+              Icons.arrow_downward,
+              color: Colors.pink,
+              size: 24.0,
             ),
             ElevatedButton(
               onPressed: () {
@@ -365,16 +340,54 @@ class _RecordPageState extends State<RecordPage> {
                 ),
               ),
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            //elevation: 0,
+                            //foregroundColor: Colors.red,
+                            //backgroundColor: Colors.lightBlue,
+                            //change text color of button
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: () {
+                            doRecord();
+                          },
+                          child: const Row(children: [
+                            SizedBox(
+                              width: 40,
+                              height: 40,
+                              child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                            Text('记录'),
+                            SizedBox(width: 10),
+                            Icon(Icons.send),
+                          ]),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        tooltip: 'Increment',
-        onPressed: () {
-          _showPicker(true);
-        },
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

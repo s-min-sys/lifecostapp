@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:lifecostapp/components/global.dart';
 
 class NetUtils {
-  static String baseUrl = dotenv.env['SERVER_DOMAIN_DEV']!;
-
   static String? token;
 
   /// http request methods
@@ -16,7 +15,10 @@ class NetUtils {
   }
 
   static Uri getUri(String url, Map<String, dynamic>? parameters) {
-    return baseUrl.endsWith('https://')
+    String baseUrl = Global.devMode
+        ? dotenv.env['SERVER_DOMAIN_DEV']!
+        : dotenv.env['SERVER_DOMAIN']!;
+    return baseUrl.startsWith('https://')
         ? Uri.https(
             baseUrl.substring(baseUrl.indexOf("://") + 3), url, parameters)
         : Uri.http(
@@ -28,6 +30,7 @@ class NetUtils {
     String url, {
     Map<String, dynamic>? parameters,
     Function(T)? onSuccess,
+    Function(int code, String msg, T resp)? onResult,
     Function(String error)? onError,
   }) async {
     try {
@@ -43,9 +46,15 @@ class NetUtils {
       if (response.statusCode == 200) {
         Map<String, dynamic> resp =
             json.decode(utf8.decode(response.bodyBytes));
-        if (resp['code'] == 0) {
-          if (onSuccess != null) {
+        if (resp['code'] < 100) {
+          if (onSuccess != null && resp['code'] == 0) {
             onSuccess(resp['resp']);
+          } else {
+            throw Exception('erroMsg:${resp['message']}');
+          }
+
+          if (onResult != null) {
+            onResult(resp['code'], resp['message'] as String, resp['resp']);
           }
         } else {
           throw Exception('erroMsg:${resp['message']}');
@@ -67,6 +76,7 @@ class NetUtils {
     Map<String, dynamic>? parameters,
     Object? data,
     Function(T)? onSuccess,
+    Function(int code, String msg, T resp)? onResult,
     Function(String error)? onError,
   }) async {
     try {
@@ -81,9 +91,15 @@ class NetUtils {
       if (response.statusCode == 200) {
         Map<String, dynamic> resp =
             json.decode(utf8.decode(response.bodyBytes));
-        if (resp['code'] == 0) {
-          if (onSuccess != null) {
+        if (resp['code'] < 100) {
+          if (onSuccess != null && resp['code'] == 0) {
             onSuccess(resp['resp']);
+          } else {
+            throw Exception('erroMsg:${resp['message']}');
+          }
+
+          if (onResult != null) {
+            onResult(resp['code'], resp['message'] as String, resp['resp']);
           }
         } else {
           throw Exception('erroMsg:${resp['message']}');
@@ -105,6 +121,7 @@ class NetUtils {
       Object? data,
       method,
       Function(dynamic)? onSuccess,
+      Function(int code, String msg, dynamic resp)? onResult,
       Function(String error)? onError}) async {
     parameters = parameters ?? {};
     method = method ?? 'GET';
@@ -116,6 +133,11 @@ class NetUtils {
         onSuccess: (data) {
           if (onSuccess != null) {
             onSuccess(data);
+          }
+        },
+        onResult: (code, msg, data) {
+          if (onResult != null) {
+            onResult(code, msg, data);
           }
         },
         onError: (error) {
@@ -132,6 +154,11 @@ class NetUtils {
         onSuccess: (data) {
           if (onSuccess != null) {
             onSuccess(data);
+          }
+        },
+        onResult: (code, msg, data) {
+          if (onResult != null) {
+            onResult(code, msg, data);
           }
         },
         onError: (error) {

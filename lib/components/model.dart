@@ -127,7 +127,9 @@ class BaseInfo {
           .toList(),
       selfWallets: MerchantWallets.fromJson(json['selfWallets']),
       labels: (json['labels'] as List).map((e) => IDName.fromJson(e)).toList(),
-      groups: (json['groups'] as List).map((e) => IDName.fromJson(e)).toList(),
+      groups: json['groups'] == null
+          ? []
+          : (json['groups'] as List).map((e) => IDName.fromJson(e)).toList(),
     );
   }
 
@@ -172,5 +174,210 @@ class BaseInfo {
     }
 
     return PickerData(idM, nameM, selected);
+  }
+}
+
+class Bill {
+  final String id;
+  final String fromSubWalletID;
+  final String fromSubWalletName;
+  final String toSubWalletID;
+  final String toSubWalletName;
+  final int costDir;
+  final int amount;
+  final List<String> labelIDs;
+  final List<String> labelIDNames;
+  final String remark;
+  final int lossAmount;
+  final String lossWalletID;
+  final String lossWalletName;
+  final String atS;
+  final String fromPersonName;
+  final String toPersonName;
+  final String operationID;
+  final String operationName;
+
+  const Bill({
+    required this.id,
+    required this.fromSubWalletID,
+    required this.fromSubWalletName,
+    required this.toSubWalletID,
+    required this.toSubWalletName,
+    required this.costDir,
+    required this.amount,
+    required this.labelIDs,
+    required this.labelIDNames,
+    required this.remark,
+    required this.lossAmount,
+    required this.lossWalletID,
+    required this.lossWalletName,
+    required this.atS,
+    required this.fromPersonName,
+    required this.toPersonName,
+    required this.operationID,
+    required this.operationName,
+  });
+
+  factory Bill.fromJson(Map<String, dynamic> json) {
+    return Bill(
+      id: json['id'],
+      fromSubWalletID: json['fromSubWalletID'],
+      fromSubWalletName: json['fromSubWalletName'],
+      toSubWalletID: json['toSubWalletID'],
+      toSubWalletName: json['toSubWalletName'],
+      costDir: json['costDir'],
+      amount: json['amount'],
+      labelIDs: List<String>.from(json['labelIDs'] as List),
+      labelIDNames: List<String>.from(json['labelIDNames'] as List),
+      remark: json['remark'],
+      lossAmount: json['lossAmount'],
+      lossWalletID: json['lossWalletID'],
+      lossWalletName: json['lossWalletName'],
+      atS: json['atS'],
+      fromPersonName: json['fromPersonName'],
+      toPersonName: json['toPersonName'],
+      operationID: json['operationID'],
+      operationName: json['operationName'],
+    );
+  }
+
+  factory Bill.empty() {
+    return const Bill(
+      id: '',
+      fromSubWalletID: '',
+      fromSubWalletName: '',
+      toSubWalletID: '',
+      toSubWalletName: '',
+      costDir: 0,
+      amount: 0,
+      labelIDs: [],
+      labelIDNames: [],
+      remark: '',
+      lossAmount: 0,
+      lossWalletID: '',
+      lossWalletName: '',
+      atS: '',
+      fromPersonName: '',
+      toPersonName: '',
+      operationID: '',
+      operationName: '',
+    );
+  }
+}
+
+class GetRecordsResp {
+  final List<Bill> bills;
+  final bool hasMore;
+  final Statistics dayStatistics;
+  final Statistics weekStatistics;
+  final Statistics monthStatistics;
+
+  const GetRecordsResp(
+      {required this.bills,
+      required this.hasMore,
+      required this.dayStatistics,
+      required this.weekStatistics,
+      required this.monthStatistics});
+
+  factory GetRecordsResp.fromJson(Map<String, dynamic> json) {
+    return GetRecordsResp(
+      bills: json['bills'] == null
+          ? []
+          : (json['bills'] as List).map((e) => Bill.fromJson(e)).toList(),
+      hasMore: json['hasMore'],
+      dayStatistics: Statistics.fromJson(json['dayStatistics']),
+      weekStatistics: Statistics.fromJson(json['weekStatistics']),
+      monthStatistics: Statistics.fromJson(json['monthStatistics']),
+    );
+  }
+
+  factory GetRecordsResp.empty() {
+    return GetRecordsResp(
+        bills: [],
+        hasMore: false,
+        dayStatistics: Statistics.empty(),
+        weekStatistics: Statistics.empty(),
+        monthStatistics: Statistics.empty());
+  }
+}
+
+class Statistics {
+  final int incomingCount;
+  final int outgoingCount;
+  final int groupTransCount;
+
+  final int incomingAmount;
+  final int outgoingAmount;
+
+  const Statistics(
+      {required this.incomingCount,
+      required this.outgoingCount,
+      required this.groupTransCount,
+      required this.incomingAmount,
+      required this.outgoingAmount});
+
+  factory Statistics.fromJson(Map<String, dynamic> json) {
+    return Statistics(
+      incomingCount: json['incomingCount'],
+      outgoingCount: json['outgoingCount'],
+      groupTransCount: json['groupTransCount'],
+      incomingAmount: json['incomingAmount'],
+      outgoingAmount: json['outgoingAmount'],
+    );
+  }
+
+  factory Statistics.empty() {
+    return const Statistics(
+        incomingCount: 0,
+        outgoingCount: 0,
+        groupTransCount: 0,
+        incomingAmount: 0,
+        outgoingAmount: 0);
+  }
+}
+
+class StatisticsResp {
+  final Statistics dayStatistics;
+  final Statistics weekStatistics;
+  final Statistics monthStatistics;
+
+  const StatisticsResp({
+    required this.dayStatistics,
+    required this.weekStatistics,
+    required this.monthStatistics,
+  });
+
+  factory StatisticsResp.fromJson(Map<String, dynamic> json) {
+    return StatisticsResp(
+      dayStatistics: Statistics.fromJson(json['dayStatistics']),
+      weekStatistics: Statistics.fromJson(json['weekStatistics']),
+      monthStatistics: Statistics.fromJson(json['monthStatistics']),
+    );
+  }
+
+  factory StatisticsResp.empty() {
+    return StatisticsResp(
+        dayStatistics: Statistics.empty(),
+        weekStatistics: Statistics.empty(),
+        monthStatistics: Statistics.empty());
+  }
+}
+
+class GroupEnterCodesResp {
+  final List<String> enterCodes;
+  final String expireAtS;
+
+  const GroupEnterCodesResp(
+      {required this.enterCodes, required this.expireAtS});
+
+  factory GroupEnterCodesResp.fromJson(Map<String, dynamic> json) {
+    return GroupEnterCodesResp(
+      enterCodes: List<String>.from(json['enterCodes']),
+      expireAtS: json['expireAtS'],
+    );
+  }
+
+  factory GroupEnterCodesResp.empty() {
+    return const GroupEnterCodesResp(enterCodes: [], expireAtS: '');
   }
 }

@@ -1,11 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:lifecostapp/components/global.dart';
 import 'package:lifecostapp/components/model.dart';
 import 'package:lifecostapp/helper/alert.dart';
 import 'package:lifecostapp/helper/netutils.dart';
-import 'package:lifecostapp/pages/record.dart';
+import 'package:lifecostapp/pages/group.dart';
+import 'package:lifecostapp/pages/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
@@ -23,32 +22,46 @@ class _LoginPageState extends State<LoginPage> {
   void doGetBaseInfos() {
     NetUtils.requestHttp('/base-infos', method: NetUtils.getMethod,
         onSuccess: (data) {
-      Global.baseInfo = BaseInfo.fromJson(data);
+      var baseInfo = BaseInfo.fromJson(data);
 
-      print(jsonEncode(Global.baseInfo));
+      if (baseInfo.groups.isNotEmpty) {
+        Global.baseInfo = baseInfo;
+
+        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+                builder: (context) => const HomePage(
+                      title: '生活消费',
+                    )),
+            (route) => false);
+
+        return;
+      }
 
       Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const RecordPage()),
+          MaterialPageRoute(builder: (context) => const GroupPage()),
           (route) => false);
-/*
-      Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-              builder: (context) => const HomePage(
-                    title: '生活消费',
-                  )),
-          (route) => false);
-          */
     }, onError: (error) {
       AlertUtils.alertDialog(context: context, content: error)
           .then((value) => {print(value)});
     });
   }
 
+  String getTokenStorageKey() {
+    if (Global.devMode) {
+      return 'devToken';
+    }
+
+    return 'token';
+  }
+
   @override
   void initState() {
     SharedPreferences.getInstance().then((sp) => {
-          if (sp.containsKey('token'))
-            {NetUtils.reset(sp.getString('token')), doGetBaseInfos()}
+          if (sp.containsKey(getTokenStorageKey()))
+            {
+              NetUtils.reset(sp.getString(getTokenStorageKey())),
+              doGetBaseInfos()
+            }
         });
     super.initState();
   }
@@ -138,15 +151,28 @@ class _LoginPageState extends State<LoginPage> {
                           'userName': userNameController.text,
                           'password': passwordController.text
                         }, onSuccess: (data) {
-                      SharedPreferences.getInstance()
-                          .then((sp) => {sp.setString('token', data['token'])});
+                      SharedPreferences.getInstance().then((sp) =>
+                          {sp.setString(getTokenStorageKey(), data['token'])});
                       NetUtils.reset(data['token']);
                       doGetBaseInfos();
                     }, onError: (error) {
-                      AlertUtils.alertDialog(context: context, content: error)
-                          .then((value) => {print(value)});
+                      AlertUtils.alertDialog(context: context, content: error);
                     });
-                  } else {}
+                  } else if (mode == 2) {
+                    NetUtils.requestHttp('/register',
+                        method: NetUtils.postMethod,
+                        data: {
+                          'userName': userNameController.text,
+                          'password': passwordController.text
+                        }, onSuccess: (data) {
+                      SharedPreferences.getInstance().then((sp) =>
+                          {sp.setString(getTokenStorageKey(), data['token'])});
+                      NetUtils.reset(data['token']);
+                      doGetBaseInfos();
+                    }, onError: (error) {
+                      AlertUtils.alertDialog(context: context, content: error);
+                    });
+                  }
                 },
                 child: Text(
                   mode == 1 ? 'Login' : 'register',
