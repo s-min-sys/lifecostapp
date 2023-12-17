@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:lifecostapp/components/global.dart';
 import 'package:lifecostapp/components/model.dart';
+import 'package:lifecostapp/components/share.dart';
 import 'package:lifecostapp/helper/alert.dart';
 import 'package:lifecostapp/helper/money.dart';
 import 'package:lifecostapp/helper/netutils.dart';
 import 'package:lifecostapp/pages/login.dart';
 import 'package:lifecostapp/pages/record.dart';
+import 'package:toastification/toastification.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -48,9 +50,16 @@ class _HomePageState extends State<HomePage> {
         dayStatistics = newRecords.dayStatistics;
         weekStatistics = newRecords.weekStatistics;
         monthStatistics = newRecords.monthStatistics;
+        toastification.show(
+          context: context,
+          title: '加载${newRecords.bills.length}条记录',
+          autoCloseDuration: const Duration(seconds: 5),
+        );
       });
     }, onError: (error) {
       AlertUtils.alertDialog(context: context, content: error);
+    }, onReLogin: () {
+      Share.doLogout(context);
     });
   }
 
@@ -94,12 +103,19 @@ class _HomePageState extends State<HomePage> {
       dayStatistics = newRecords.dayStatistics;
       weekStatistics = newRecords.weekStatistics;
       monthStatistics = newRecords.monthStatistics;
+      toastification.show(
+        context: context,
+        title: '新加载${newRecords.bills.length}条记录',
+        autoCloseDuration: const Duration(seconds: 2),
+      );
 
       setState(() {
         isLoading = false;
       });
     }, onError: (error) {
       AlertUtils.alertDialog(context: context, content: error);
+    }, onReLogin: () {
+      Share.doLogout(context);
     });
   }
 
@@ -364,10 +380,10 @@ class _HomePageState extends State<HomePage> {
                           AlertUtils.alertDialog(
                                   context: context,
                                   content:
-                                      '${resp.enterCodes[0]} , 过期时间为:${resp.expireAtS}',
-                                  okButtonText: '拷贝进组码到内存',
+                                      '${resp.enterCodes[0]}\n\n过期时间为:${resp.expireAtS}',
+                                  okButtonText: '复制',
                                   cancelButtonText: '关闭',
-                                  title: '此进入码只显示一次')
+                                  title: '此邀请码码只显示一次')
                               .then((value) => {
                                     if (value == 'ok')
                                       {
