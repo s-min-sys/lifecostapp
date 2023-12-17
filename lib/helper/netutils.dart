@@ -95,14 +95,14 @@ class NetUtils {
           if (onSuccess != null && resp['code'] == 0) {
             onSuccess(resp['resp']);
           } else {
-            throw Exception('erroMsg:${resp['message']}');
+            throw Exception('${resp['message']}');
           }
 
           if (onResult != null) {
             onResult(resp['code'], resp['message'] as String, resp['resp']);
           }
         } else {
-          throw Exception('erroMsg:${resp['message']}');
+          throw Exception('${resp['message']}');
         }
       } else {
         if (onError != null) {
@@ -142,6 +142,9 @@ class NetUtils {
         },
         onError: (error) {
           if (onError != null) {
+            if (error.startsWith('Exception:')) {
+              error = error.substring('Exception:'.length);
+            }
             onError(error);
           }
         },
@@ -163,6 +166,9 @@ class NetUtils {
         },
         onError: (error) {
           if (onError != null) {
+            if (error.startsWith('Exception:')) {
+              error = error.substring('Exception:'.length);
+            }
             onError(error);
           }
         },

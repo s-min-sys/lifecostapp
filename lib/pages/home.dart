@@ -298,17 +298,39 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  String title() {
+    var baseInfo = Global.baseInfo;
+    if (baseInfo == null) {
+      return '生活消费';
+    }
+
+    return '生活消费 - ${baseInfo.selfWallets.personName}';
+  }
+
+  String userName() {
+    var baseInfo = Global.baseInfo;
+    if (baseInfo == null) {
+      return '-';
+    }
+
+    return baseInfo.selfWallets.personName;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
+        title: Text(title()),
       ),
       drawer: Drawer(
         child: SingleChildScrollView(
           child: Column(
             children: [
+              UserAccountsDrawerHeader(
+                accountName: Text(userName()),
+                accountEmail: const Text(''),
+              ),
               CheckboxListTile(
                 title: const Text('开发环境'),
                 onChanged: (bool? value) {
@@ -323,6 +345,7 @@ class _HomePageState extends State<HomePage> {
                 },
                 value: Global.devMode,
               ),
+              const Divider(),
               ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.payments)),
                   title: const Text("生成进组码"),
@@ -357,8 +380,9 @@ class _HomePageState extends State<HomePage> {
                               context: context, content: error);
                         })
                       }),
+              const Divider(),
               ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.payments)),
+                  leading: const CircleAvatar(child: Icon(Icons.logout)),
                   title: const Text("退出"),
                   onTap: () => {doLogout()}),
             ],
