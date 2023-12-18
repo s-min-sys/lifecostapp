@@ -474,13 +474,6 @@ class _HomePageState extends State<HomePage> {
                       }),
               const Divider(),
               ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.analytics)),
-                  title: const Text("统计"),
-                  onTap: () => {
-                        toWalletAddPage(),
-                      }),
-              const Divider(),
-              ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.logout)),
                   title: const Text("退出"),
                   onTap: () => {doLogout()}),
