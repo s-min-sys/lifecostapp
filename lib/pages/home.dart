@@ -91,8 +91,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _loadMore4Online() {
-    bool up = controller.edge == IndicatorEdge.leading;
+    _loadMore4OnlineOnUDFlag(controller.edge == IndicatorEdge.leading);
+  }
 
+  void _loadMore4OnlineOnUDFlag(bool up) {
     setState(() {
       isLoading = true;
     });
@@ -195,6 +197,7 @@ class _HomePageState extends State<HomePage> {
       size: 24.0,
     ));
     widgets.add(Text(personName));
+    widgets.add(const SizedBox(width: 8));
     widgets.add(Icon(
       Icons.wallet,
       color: color,
@@ -349,7 +352,7 @@ class _HomePageState extends State<HomePage> {
                 '收入',
                 priceToUIYuanStringWithYuan(statistics.incomingAmount),
                 statistics.incomingCount,
-                Colors.green),
+                Colors.green)
           ],
         ),
       ),
@@ -382,8 +385,13 @@ class _HomePageState extends State<HomePage> {
       return const Text('生活消费');
     }
 
-    return Row(children: [
-      const Text('生活消费 [离线模式]'),
+    return Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+      const Text('生活消费'),
+      const Text(' 离线模式',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.blueGrey,
+          )),
       const SizedBox(width: 20),
       ElevatedButton(
           onPressed: () {
@@ -466,6 +474,13 @@ class _HomePageState extends State<HomePage> {
                       }),
               const Divider(),
               ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.analytics)),
+                  title: const Text("统计"),
+                  onTap: () => {
+                        toWalletAddPage(),
+                      }),
+              const Divider(),
+              ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.logout)),
                   title: const Text("退出"),
                   onTap: () => {doLogout()}),
@@ -473,30 +488,43 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: CustomMaterialIndicator(
-        trigger: IndicatorTrigger.bothEdges,
-        onRefresh: () async {
-          _loadMore();
-        },
-        controller: controller,
-        indicatorBuilder:
-            (BuildContext context, IndicatorController controller) {
-          return const Icon(
-            Icons.ac_unit,
-            color: Colors.blue,
-            size: 30,
-          );
-        },
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                statisticsWidget('日统计', dayStatistics),
-                statisticsWidget('周统计', weekStatistics),
-              ]),
-            ),
-            Expanded(
+      body: Column(
+        children: [
+          Row(
+            children: [
+              const SizedBox(height: 90, width: 20),
+              Expanded(
+                child: SizedBox(
+                  height: 90,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      statisticsWidget('日统计', dayStatistics),
+                      const SizedBox(width: 2),
+                      statisticsWidget('周统计', weekStatistics),
+                      const SizedBox(width: 2),
+                      statisticsWidget('月统计', monthStatistics),
+                    ],
+                  ),
+                ),
+              )
+            ],
+          ),
+          Expanded(
+            child: CustomMaterialIndicator(
+              trigger: IndicatorTrigger.bothEdges,
+              onRefresh: () async {
+                _loadMore();
+              },
+              controller: controller,
+              indicatorBuilder:
+                  (BuildContext context, IndicatorController controller) {
+                return const Icon(
+                  Icons.ac_unit,
+                  color: Colors.blue,
+                  size: 30,
+                );
+              },
               child: ListView.separated(
                 //controller: _scrollController,
                 itemCount: items.length + (isLoading ? 1 : 0),
@@ -515,8 +543,8 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -534,7 +562,13 @@ class _HomePageState extends State<HomePage> {
       MaterialPageRoute(
           builder: (context) => RecordPage(online: widget.online)),
     );
-    if (result != widget.online) {
+
+    if (widget.online) {
+      _loadMore4OnlineOnUDFlag(true);
+    } else {
+      flushRecords4Offlne();
+    }
+    if (result != null && result != widget.online) {
       if (context.mounted) Share.naviToLogin(context);
     }
   }

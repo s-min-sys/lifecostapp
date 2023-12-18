@@ -7,7 +7,7 @@ class Global {
   static const baseInfoKey = 'base-info';
 
   static BaseInfo? _baseInfo;
-  static bool devMode = true;
+  static bool devMode = false;
 
   static SharedPreferences? gSP;
 

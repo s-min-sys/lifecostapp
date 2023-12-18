@@ -282,7 +282,7 @@ class _RecordPageState extends State<RecordPage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(title()),
       ),
-      body: Center(
+      body: SingleChildScrollView(
         child: Column(
           children: [
             const SizedBox(height: 20),
