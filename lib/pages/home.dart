@@ -144,7 +144,19 @@ class _HomePageState extends State<HomePage> {
         isLoading = false;
       });
     }, onError: (error) {
-      AlertUtils.alertDialog(context: context, content: error);
+      if (Share.isNetworkError(error)) {
+        AlertUtils.alertDialog(
+                context: context,
+                content: '网络错误，是否切换到离线模式?',
+                okButtonText: '好',
+                cancelButtonText: "不要了")
+            .then((value) => {
+                  if (value == 'ok')
+                    {if (context.mounted) Share.naviToLogin(context)}
+                });
+      } else {
+        AlertUtils.alertDialog(context: context, content: error);
+      }
 
       setState(() {
         isLoading = false;
@@ -556,13 +568,14 @@ class _HomePageState extends State<HomePage> {
           builder: (context) => RecordPage(online: widget.online)),
     );
 
-    if (widget.online) {
-      _loadMore4OnlineOnUDFlag(true);
-    } else {
-      flushRecords4Offlne();
-    }
     if (result != null && result != widget.online) {
       if (context.mounted) Share.naviToLogin(context);
+    } else {
+      if (widget.online) {
+        _loadMore4OnlineOnUDFlag(true);
+      } else {
+        flushRecords4Offlne();
+      }
     }
   }
 

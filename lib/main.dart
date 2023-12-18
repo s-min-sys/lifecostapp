@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:lifecostapp/components/global.dart';
 import 'package:lifecostapp/pages/login.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -7,6 +8,24 @@ Future<void> main() async {
   await dotenv.load(fileName: ".env");
   Global.init();
   runApp(const MyApp());
+  configLoading();
+}
+
+void configLoading() {
+  EasyLoading.instance
+    //..displayDuration = const Duration(milliseconds: 2000)
+    ..indicatorType = EasyLoadingIndicatorType.fadingCircle
+    ..loadingStyle = EasyLoadingStyle.light
+    ..indicatorSize = 45.0
+    ..radius = 10.0
+    ..progressColor = Colors.yellow
+    ..backgroundColor = Colors.green
+    ..indicatorColor = Colors.yellow
+    ..textColor = Colors.yellow
+    ..maskColor = Colors.blue.withOpacity(0.5)
+    ..userInteractions = false
+    ..maskType = EasyLoadingMaskType.black
+    ..dismissOnTap = false;
 }
 
 class MyApp extends StatelessWidget {
@@ -37,6 +56,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const LoginPage(),
+      builder: EasyLoading.init(),
     );
   }
 }

@@ -39,7 +39,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
               onPressed: () {
                 personWalletNew();
               },
-              child: const Text('生成个人钱包')),
+              child: const Text('生成新的个人钱包')),
           const Divider(),
           Padding(
             //padding: const EdgeInsets.only(left:15.0,right: 15.0,top:0,bottom: 0),
@@ -47,7 +47,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
             child: TextField(
               decoration: const InputDecoration(
                   border: OutlineInputBorder(),
-                  labelText: '进账的方式名字',
+                  labelText: '进账的方式/机构名字',
                   hintText: '输入一个合法的进账方式名字: 例如 理财/路上拾遗/继承遗产 等'),
               controller: earnWalletNameController,
             ),
@@ -73,7 +73,7 @@ class _WalletAddPageState extends State<WalletAddPage> {
               onPressed: () {
                 earnConsumeWalletNew(2);
               },
-              child: const Text('生成新的消费方式/机构')),
+              child: const Text('生成新的消费方式')),
         ])));
   }
 

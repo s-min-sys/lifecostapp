@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 class AlertUtils {
   static Future alertDialog(
       {required BuildContext context,
-      String title = '错误',
+      String title = '消息',
       okButtonText = '确定',
       cancelButtonText = '取消',
       required content}) async {
+    if (!context.mounted) {
+      return;
+    }
     return showDialog(
         barrierDismissible: false,
         context: context,

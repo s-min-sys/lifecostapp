@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:http/http.dart' as http;
 import 'package:lifecostapp/components/global.dart';
 
@@ -35,6 +36,8 @@ class NetUtils {
     Function()? onReLogin,
   }) async {
     try {
+      EasyLoading.show(status: '加载中...', dismissOnTap: false);
+
       final response = await http.get(
         getUri(url, parameters),
         headers: {
@@ -79,6 +82,8 @@ class NetUtils {
       if (onError != null) {
         onError(e.toString());
       }
+    } finally {
+      EasyLoading.dismiss();
     }
   }
 
@@ -92,6 +97,8 @@ class NetUtils {
     Function()? onReLogin,
   }) async {
     try {
+      EasyLoading.show(status: '加载中...', dismissOnTap: false);
+
       final response = await http.post(getUri(url, parameters),
           headers: {
             'Accept': 'application/json,*/*',
@@ -136,6 +143,8 @@ class NetUtils {
       if (onError != null) {
         onError(e.toString());
       }
+    } finally {
+      EasyLoading.dismiss();
     }
   }
 

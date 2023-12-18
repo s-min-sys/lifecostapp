@@ -113,7 +113,12 @@ class _RecordPageState extends State<RecordPage> {
         AlertUtils.alertDialog(
           context: context,
           content: "记录成功，是否关闭",
-        ).then((value) => {if (value == 'ok') Navigator.pop(context, online)});
+        ).then((value) => {
+              if (value == 'ok')
+                {Navigator.pop(context, online)}
+              else
+                priceController.text = ''
+            });
       }, onError: (error) {
         setState(() {
           online = false;
@@ -132,7 +137,12 @@ class _RecordPageState extends State<RecordPage> {
         AlertUtils.alertDialog(
           context: context,
           content: "缓存成功, 记录将会在连接服务器后自动上传，是否关闭",
-        ).then((value) => {if (value == 'ok') Navigator.pop(context, online)});
+        ).then((value) => {
+              if (value == 'ok')
+                {Navigator.pop(context, online)}
+              else
+                priceController.text = ''
+            });
       });
     }
 
