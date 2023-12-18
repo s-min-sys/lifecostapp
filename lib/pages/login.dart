@@ -81,7 +81,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(mode == 1 ? 'Login' : 'Register'),
+        title: Text(mode == 1 ? '登录' : '注册'),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -101,8 +101,8 @@ class _LoginPageState extends State<LoginPage> {
               child: TextField(
                 decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'UserName',
-                    hintText: 'Enter valid user name'),
+                    labelText: '用户名',
+                    hintText: '输入用户名'),
                 controller: userNameController,
               ),
             ),
@@ -114,8 +114,8 @@ class _LoginPageState extends State<LoginPage> {
                 obscureText: true,
                 decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Password',
-                    hintText: 'Enter secure password'),
+                    labelText: '密码',
+                    hintText: '输入密码'),
                 controller: passwordController,
               ),
             ),
@@ -133,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
                   }
                 },
                 child: Text(
-                  mode == 1 ? 'Not Account' : 'Has Account',
+                  mode == 1 ? '还没账户' : '已经有账户了',
                   style: const TextStyle(color: Colors.blue, fontSize: 15),
                 ),
               ),
@@ -142,7 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                   //
                 },
                 child: const Text(
-                  'Forgot Password',
+                  '忘记密码',
                   style: TextStyle(color: Colors.blue, fontSize: 15),
                 ),
               ),
@@ -185,7 +185,7 @@ class _LoginPageState extends State<LoginPage> {
                   }
                 },
                 child: Text(
-                  mode == 1 ? 'Login' : 'register',
+                  mode == 1 ? '登录' : '注册',
                   style: const TextStyle(color: Colors.white, fontSize: 25),
                 ),
               ),
