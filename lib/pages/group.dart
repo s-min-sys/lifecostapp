@@ -134,7 +134,7 @@ class _GroupPageState extends State<GroupPage> {
       Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
               builder: (context) => const HomePage(
-                    title: '生活消费',
+                    online: true,
                   )),
           (route) => false);
     }, onError: (error) {

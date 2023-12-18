@@ -9,14 +9,15 @@ import 'package:lifecostapp/helper/money.dart';
 import 'package:lifecostapp/helper/netutils.dart';
 import 'package:lifecostapp/pages/login.dart';
 import 'package:lifecostapp/pages/record.dart';
+import 'package:lifecostapp/pages/walletadd.dart';
 import 'package:toastification/toastification.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.title});
-
-  final String title;
+  const HomePage({super.key, required this.online});
+  final bool online;
 
   @override
+  // ignore: no_logic_in_create_state
   State<HomePage> createState() => _HomePageState();
 }
 
@@ -32,6 +33,22 @@ class _HomePageState extends State<HomePage> {
   bool isLoading = false;
 
   void flushRecords() {
+    if (widget.online) {
+      flushRecords4Onlne();
+    } else {
+      flushRecords4Offlne();
+    }
+  }
+
+  void flushRecords4Offlne() {
+    var records = Global.getCachedRecordList();
+    if (records.isNotEmpty) {
+      items = records.map((e) => Bill.fromCacheRecord(e)).toList();
+      setState(() {});
+    }
+  }
+
+  void flushRecords4Onlne() {
     String recordID = '';
     if (items.isNotEmpty) {
       recordID = items[items.length - 1].id;
@@ -50,11 +67,13 @@ class _HomePageState extends State<HomePage> {
         dayStatistics = newRecords.dayStatistics;
         weekStatistics = newRecords.weekStatistics;
         monthStatistics = newRecords.monthStatistics;
-        toastification.show(
-          context: context,
-          title: '加载${newRecords.bills.length}条记录',
-          autoCloseDuration: const Duration(seconds: 5),
-        );
+        if (newRecords.bills.isNotEmpty) {
+          toastification.show(
+            context: context,
+            title: '加载${newRecords.bills.length}条记录',
+            autoCloseDuration: const Duration(seconds: 5),
+          );
+        }
       });
     }, onError: (error) {
       AlertUtils.alertDialog(context: context, content: error);
@@ -64,6 +83,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _loadMore() {
+    if (widget.online) {
+      _loadMore4Online();
+    } else {
+      flushRecords4Offlne();
+    }
+  }
+
+  void _loadMore4Online() {
     bool up = controller.edge == IndicatorEdge.leading;
 
     setState(() {
@@ -103,17 +130,23 @@ class _HomePageState extends State<HomePage> {
       dayStatistics = newRecords.dayStatistics;
       weekStatistics = newRecords.weekStatistics;
       monthStatistics = newRecords.monthStatistics;
-      toastification.show(
-        context: context,
-        title: '新加载${newRecords.bills.length}条记录',
-        autoCloseDuration: const Duration(seconds: 2),
-      );
+      if (newRecords.bills.isNotEmpty) {
+        toastification.show(
+          context: context,
+          title: '新加载${newRecords.bills.length}条记录',
+          autoCloseDuration: const Duration(seconds: 2),
+        );
+      }
 
       setState(() {
         isLoading = false;
       });
     }, onError: (error) {
       AlertUtils.alertDialog(context: context, content: error);
+
+      setState(() {
+        isLoading = false;
+      });
     }, onReLogin: () {
       Share.doLogout(context);
     });
@@ -124,6 +157,27 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _scrollController.addListener(_loadMore);
     flushRecords();
+
+    var records = Global.getCachedRecordList();
+    if (records.isNotEmpty) {
+      var submits =
+          records.map((e) => Record4Commit.fromCacheRecord(e)).toList();
+      NetUtils.requestHttp('/record/batch', method: NetUtils.postMethod, data: {
+        'records': submits,
+      }, onSuccess: (data) {
+        Global.removeCachedRecordList();
+        toastification.show(
+          context: context,
+          title: '缓存记录 ${submits.length} 条上传成功',
+          autoCloseDuration: const Duration(seconds: 2),
+        );
+      }, onError: (error) {
+        AlertUtils.alertDialog(
+          context: context,
+          content: error,
+        );
+      });
+    }
   }
 
   @override
@@ -314,15 +368,6 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  String title() {
-    var baseInfo = Global.baseInfo;
-    if (baseInfo == null) {
-      return '生活消费';
-    }
-
-    return '生活消费 - ${baseInfo.selfWallets.personName}';
-  }
-
   String userName() {
     var baseInfo = Global.baseInfo;
     if (baseInfo == null) {
@@ -332,12 +377,28 @@ class _HomePageState extends State<HomePage> {
     return baseInfo.selfWallets.personName;
   }
 
+  Widget title() {
+    if (widget.online) {
+      return const Text('生活消费');
+    }
+
+    return Row(children: [
+      const Text('生活消费 [离线模式]'),
+      const SizedBox(width: 20),
+      ElevatedButton(
+          onPressed: () {
+            Share.naviToLogin(context);
+          },
+          child: const Text('转在线'))
+    ]);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title()),
+        title: title(),
       ),
       drawer: Drawer(
         child: SingleChildScrollView(
@@ -398,6 +459,13 @@ class _HomePageState extends State<HomePage> {
                       }),
               const Divider(),
               ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.wallet_sharp)),
+                  title: const Text("增加钱包"),
+                  onTap: () => {
+                        toWalletAddPage(),
+                      }),
+              const Divider(),
+              ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.logout)),
                   title: const Text("退出"),
                   onTap: () => {doLogout()}),
@@ -452,14 +520,31 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const RecordPage()),
-          );
+          toRecordPage();
         },
         tooltip: '记录',
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  Future<void> toRecordPage() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => RecordPage(online: widget.online)),
+    );
+    if (result != widget.online) {
+      if (context.mounted) Share.naviToLogin(context);
+    }
+  }
+
+  Future<void> toWalletAddPage() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const WalletAddPage()),
+    );
+
+    if (context.mounted) Share.doFlushBaseInfos(context, true);
   }
 }

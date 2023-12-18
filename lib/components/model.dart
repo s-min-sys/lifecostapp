@@ -263,6 +263,29 @@ class Bill {
       operationName: '',
     );
   }
+
+  factory Bill.fromCacheRecord(CacheRecord record) {
+    return Bill(
+      id: '',
+      fromSubWalletID: record.fromSubWalletID,
+      fromSubWalletName: record.fromSubWalletName,
+      toSubWalletID: record.toSubWalletID,
+      toSubWalletName: record.toSubWalletName,
+      costDir: record.costDir,
+      amount: record.amount,
+      labelIDs: [],
+      labelIDNames: [],
+      remark: '',
+      lossAmount: 0,
+      lossWalletID: '',
+      lossWalletName: '',
+      atS: record.at.toString(),
+      fromPersonName: record.fromPersonName,
+      toPersonName: record.toPersonName,
+      operationID: '',
+      operationName: '',
+    );
+  }
 }
 
 class GetRecordsResp {
@@ -379,5 +402,91 @@ class GroupEnterCodesResp {
 
   factory GroupEnterCodesResp.empty() {
     return const GroupEnterCodesResp(enterCodes: [], expireAtS: '');
+  }
+}
+
+class CacheRecord {
+  final String fromSubWalletID;
+  final String fromSubWalletName;
+  final String fromPersonName;
+  final String toSubWalletID;
+  final String toSubWalletName;
+  final String toPersonName;
+  final int costDir;
+  final int amount;
+  final DateTime at;
+
+  const CacheRecord({
+    required this.fromSubWalletID,
+    required this.fromSubWalletName,
+    required this.fromPersonName,
+    required this.toSubWalletID,
+    required this.toSubWalletName,
+    required this.toPersonName,
+    required this.costDir,
+    required this.amount,
+    required this.at,
+  });
+
+  factory CacheRecord.fromJson(Map<String, dynamic> json) {
+    return CacheRecord(
+      fromSubWalletID: json['fromSubWalletID'],
+      fromSubWalletName: json['fromSubWalletName'],
+      fromPersonName: json['fromPersonName'],
+      toSubWalletID: json['toSubWalletID'],
+      toSubWalletName: json['toSubWalletName'],
+      toPersonName: json['toPersonName'],
+      costDir: json['costDir'],
+      amount: json['amount'],
+      at: json.containsKey('at') ? DateTime.parse(json['at']) : DateTime.now(),
+    );
+  }
+
+  Map toJson() {
+    Map map = {};
+    map["fromSubWalletID"] = fromSubWalletID;
+    map["fromSubWalletName"] = fromSubWalletName;
+    map["fromPersonName"] = fromPersonName;
+    map["toSubWalletID"] = toSubWalletID;
+    map["toSubWalletName"] = toSubWalletName;
+    map["toPersonName"] = toPersonName;
+    map["costDir"] = costDir;
+    map["amount"] = amount;
+    map["at"] = at.toString();
+
+    return map;
+  }
+}
+
+class Record4Commit {
+  final String fromSubWalletID;
+  final String toSubWalletID;
+  final int amount;
+  final int at;
+
+  const Record4Commit({
+    required this.fromSubWalletID,
+    required this.toSubWalletID,
+    required this.amount,
+    required this.at,
+  });
+
+  factory Record4Commit.fromCacheRecord(CacheRecord record) {
+    return Record4Commit(
+      fromSubWalletID: record.fromSubWalletID,
+      toSubWalletID: record.toSubWalletID,
+      amount: record.amount,
+      at: (record.at.millisecondsSinceEpoch / 1000).round(),
+    );
+  }
+
+  Map toJson() {
+    Map map = {};
+    map["fromSubWalletID"] = fromSubWalletID;
+    map["toSubWalletID"] = toSubWalletID;
+    map["amount"] = amount;
+    map["at"] = at;
+
+    return map;
   }
 }

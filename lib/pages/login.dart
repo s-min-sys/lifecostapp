@@ -19,7 +19,7 @@ class _LoginPageState extends State<LoginPage> {
   final userNameController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void doGetBaseInfos() {
+  void doGetBaseInfos(bool alertWhenError) {
     NetUtils.requestHttp('/base-infos', method: NetUtils.getMethod,
         onSuccess: (data) {
       var baseInfo = BaseInfo.fromJson(data);
@@ -30,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
         Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
                 builder: (context) => const HomePage(
-                      title: '生活消费',
+                      online: true,
                     )),
             (route) => false);
 
@@ -41,9 +41,19 @@ class _LoginPageState extends State<LoginPage> {
           MaterialPageRoute(builder: (context) => const GroupPage()),
           (route) => false);
     }, onError: (error) {
-      AlertUtils.alertDialog(context: context, content: error)
-          .then((value) => {print(value)});
-    });
+      if (alertWhenError) {
+        AlertUtils.alertDialog(context: context, content: error);
+      } else {
+        if (Global.baseInfo != null) {
+          Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (context) => const HomePage(
+                        online: false,
+                      )),
+              (route) => false);
+        }
+      }
+    }, onReLogin: () {});
   }
 
   String getTokenStorageKey() {
@@ -60,7 +70,7 @@ class _LoginPageState extends State<LoginPage> {
           if (sp.containsKey(getTokenStorageKey()))
             {
               NetUtils.reset(sp.getString(getTokenStorageKey())),
-              doGetBaseInfos()
+              doGetBaseInfos(false)
             }
         });
     super.initState();
@@ -154,7 +164,7 @@ class _LoginPageState extends State<LoginPage> {
                       SharedPreferences.getInstance().then((sp) =>
                           {sp.setString(getTokenStorageKey(), data['token'])});
                       NetUtils.reset(data['token']);
-                      doGetBaseInfos();
+                      doGetBaseInfos(true);
                     }, onError: (error) {
                       AlertUtils.alertDialog(context: context, content: error);
                     });
@@ -168,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
                       SharedPreferences.getInstance().then((sp) =>
                           {sp.setString(getTokenStorageKey(), data['token'])});
                       NetUtils.reset(data['token']);
-                      doGetBaseInfos();
+                      doGetBaseInfos(true);
                     }, onError: (error) {
                       AlertUtils.alertDialog(context: context, content: error);
                     });

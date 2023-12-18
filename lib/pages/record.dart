@@ -11,7 +11,9 @@ import 'package:lifecostapp/helper/alert.dart';
 import 'package:lifecostapp/helper/netutils.dart';
 
 class RecordPage extends StatefulWidget {
-  const RecordPage({super.key});
+  const RecordPage({super.key, required this.online});
+
+  final bool online;
 
   @override
   State<RecordPage> createState() => _RecordPageState();
@@ -23,12 +25,15 @@ class _RecordPageState extends State<RecordPage> {
   final priceController = TextEditingController();
   late FocusNode myFocusNode;
   PDuration at = PDuration.now();
+  bool online = true;
 
   @override
   void initState() {
     super.initState();
 
     myFocusNode = FocusNode();
+
+    online = widget.online;
   }
 
   @override
@@ -63,6 +68,11 @@ class _RecordPageState extends State<RecordPage> {
 
     var fromWalletID = pickerData.ids.values
         .elementAt(pickerData.selected[0])[pickerData.selected[1]];
+    var fromWalletName = pickerData.names.values
+        .elementAt(pickerData.selected[0])[pickerData.selected[1]];
+    var fromPersonID = pickerData.ids.keys.elementAt(pickerData.selected[0]);
+    var fromPersonName =
+        pickerData.names.keys.elementAt(pickerData.selected[0]);
 
     pickerData = toPickerData;
     if (pickerData == null || pickerData.ids.isEmpty) {
@@ -73,6 +83,17 @@ class _RecordPageState extends State<RecordPage> {
 
     var toWalletID = pickerData.ids.values
         .elementAt(pickerData.selected[0])[pickerData.selected[1]];
+    var toWalletName = pickerData.names.values
+        .elementAt(pickerData.selected[0])[pickerData.selected[1]];
+    var toPersonID = pickerData.ids.keys.elementAt(pickerData.selected[0]);
+    var toPersonName = pickerData.names.keys.elementAt(pickerData.selected[0]);
+
+    int dir = 1;
+    if (fromPersonID == Global.baseInfo?.selfWallets.personID) {
+      dir = 3;
+    } else if (toPersonID == Global.baseInfo?.selfWallets.personID) {
+      dir = 2;
+    }
 
     DateTime curAt = DateTime(
         at.getSingle(DateType.Year),
@@ -82,19 +103,55 @@ class _RecordPageState extends State<RecordPage> {
         at.getSingle(DateType.Minute),
         at.getSingle(DateType.Second));
 
-    NetUtils.requestHttp('/record', method: NetUtils.postMethod, data: {
-      'fromSubWalletID': fromWalletID,
-      'toSubWalletID': toWalletID,
-      'amount': price,
-      'at': (curAt.millisecondsSinceEpoch / 1000).round(),
-    }, onSuccess: (data) {
+    if (online) {
+      NetUtils.requestHttp('/record', method: NetUtils.postMethod, data: {
+        'fromSubWalletID': fromWalletID,
+        'toSubWalletID': toWalletID,
+        'amount': price,
+        'at': (curAt.millisecondsSinceEpoch / 1000).round(),
+      }, onSuccess: (data) {
+        AlertUtils.alertDialog(
+          context: context,
+          content: "记录成功，是否关闭",
+        ).then((value) => {if (value == 'ok') Navigator.pop(context, online)});
+      }, onError: (error) {
+        setState(() {
+          online = false;
+        });
+
+        Global.addToCachedRecordList(CacheRecord(
+            fromSubWalletID: fromWalletID,
+            fromSubWalletName: fromWalletName,
+            fromPersonName: fromPersonName,
+            toSubWalletID: toWalletID,
+            toSubWalletName: toWalletName,
+            toPersonName: toPersonName,
+            costDir: dir,
+            amount: price,
+            at: curAt));
+        AlertUtils.alertDialog(
+          context: context,
+          content: "缓存成功, 记录将会在连接服务器后自动上传，是否关闭",
+        ).then((value) => {if (value == 'ok') Navigator.pop(context, online)});
+      });
+    }
+
+    if (!online) {
+      Global.addToCachedRecordList(CacheRecord(
+          fromSubWalletID: fromWalletID,
+          fromSubWalletName: fromWalletName,
+          fromPersonName: fromPersonName,
+          toSubWalletID: toWalletID,
+          toSubWalletName: toWalletName,
+          toPersonName: toPersonName,
+          costDir: dir,
+          amount: price,
+          at: curAt));
       AlertUtils.alertDialog(
         context: context,
-        content: "记录成功，是否关闭",
-      ).then((value) => {if (value == 'ok') Navigator.pop(context)});
-    }, onError: (error) {
-      AlertUtils.alertDialog(context: context, content: error);
-    });
+        content: "缓存成功, 记录将会在连接服务器后自动上传，是否关闭",
+      ).then((value) => {if (value == 'ok') Navigator.pop(context, online)});
+    }
   }
 
   List<String> fromSelectText() {
@@ -199,6 +256,14 @@ class _RecordPageState extends State<RecordPage> {
     });
   }
 
+  String title() {
+    if (online) {
+      return '记录';
+    }
+
+    return '记录 [离线模式]';
+  }
+
   @override
   Widget build(BuildContext context) {
     var from = fromSelectText();
@@ -215,7 +280,7 @@ class _RecordPageState extends State<RecordPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('记录'),
+        title: Text(title()),
       ),
       body: Center(
         child: Column(
