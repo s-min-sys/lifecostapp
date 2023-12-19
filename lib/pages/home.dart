@@ -273,8 +273,9 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Padding(
-      padding: const EdgeInsets.all(6.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
             Row(
@@ -299,12 +300,72 @@ class _HomePageState extends State<HomePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [...wRight]),
             ]),
+            Visibility(
+                visible: bill.remark.isNotEmpty && bill.remark.length <= 4,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    bill.remark,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.grey,
+                    ),
+                  ),
+                )),
             const SizedBox(width: 30),
             const Expanded(
               child: Text(''),
             ),
             priceExWidget,
           ]),
+          Visibility(
+            visible: bill.remark.isNotEmpty,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Wrap(
+                alignment: WrapAlignment.start,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 10,
+                runSpacing: 2,
+                children: [
+                  Visibility(
+                    visible: bill.remark.length > 4,
+                    child: Text(
+                      '备注: ${bill.remark}',
+                      style: const TextStyle(
+                        color: Colors.black,
+                        decoration: TextDecoration.underline,
+                        fontStyle: FontStyle.italic,
+                        fontSize: 12,
+                      ),
+                      softWrap: true,
+                      textAlign: TextAlign.left,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
+                  ...bill.labelIDNames
+                      .map((e) => Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 1),
+                            decoration: BoxDecoration(
+                                borderRadius: const BorderRadius.all(
+                                    Radius.circular(4.0)),
+                                border: Border.all(color: Colors.blueAccent)),
+                            child: Text(
+                              e,
+                              style: const TextStyle(
+                                  fontStyle: FontStyle.italic,
+                                  fontSize: 12,
+                                  color: Colors.blue),
+                            ),
+                          ))
+                      .toList(),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

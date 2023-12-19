@@ -414,6 +414,8 @@ class CacheRecord {
   final String toPersonName;
   final int costDir;
   final int amount;
+  final String remark;
+  final List<String> labels;
   final DateTime at;
 
   const CacheRecord({
@@ -425,6 +427,8 @@ class CacheRecord {
     required this.toPersonName,
     required this.costDir,
     required this.amount,
+    required this.remark,
+    required this.labels,
     required this.at,
   });
 
@@ -438,6 +442,10 @@ class CacheRecord {
       toPersonName: json['toPersonName'],
       costDir: json['costDir'],
       amount: json['amount'],
+      remark: json.containsKey('remark') ? json['remark'] : '',
+      labels: json.containsKey('labels') && json['labels'] != null
+          ? List<String>.from(json['labels'])
+          : [],
       at: json.containsKey('at') ? DateTime.parse(json['at']) : DateTime.now(),
     );
   }
@@ -452,6 +460,8 @@ class CacheRecord {
     map["toPersonName"] = toPersonName;
     map["costDir"] = costDir;
     map["amount"] = amount;
+    map["remark"] = remark;
+    map["labels"] = labels;
     map["at"] = at.toString();
 
     return map;
@@ -462,12 +472,16 @@ class Record4Commit {
   final String fromSubWalletID;
   final String toSubWalletID;
   final int amount;
+  final String remark;
+  final List<String> labels;
   final int at;
 
   const Record4Commit({
     required this.fromSubWalletID,
     required this.toSubWalletID,
     required this.amount,
+    required this.remark,
+    required this.labels,
     required this.at,
   });
 
@@ -476,6 +490,8 @@ class Record4Commit {
       fromSubWalletID: record.fromSubWalletID,
       toSubWalletID: record.toSubWalletID,
       amount: record.amount,
+      remark: record.remark,
+      labels: record.labels,
       at: (record.at.millisecondsSinceEpoch / 1000).round(),
     );
   }
@@ -485,6 +501,8 @@ class Record4Commit {
     map["fromSubWalletID"] = fromSubWalletID;
     map["toSubWalletID"] = toSubWalletID;
     map["amount"] = amount;
+    map["remark"] = remark;
+    map["labelIDs"] = labels;
     map["at"] = at;
 
     return map;

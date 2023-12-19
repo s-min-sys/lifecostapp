@@ -9,6 +9,7 @@ import 'package:lifecostapp/components/global.dart';
 import 'package:lifecostapp/components/model.dart';
 import 'package:lifecostapp/helper/alert.dart';
 import 'package:lifecostapp/helper/netutils.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 class RecordPage extends StatefulWidget {
   const RecordPage({super.key, required this.online});
@@ -26,6 +27,9 @@ class _RecordPageState extends State<RecordPage> {
   late FocusNode myFocusNode;
   PDuration at = PDuration.now();
   bool online = true;
+  bool moreFlag = false;
+  final remarkController = TextEditingController();
+  List<IDName> selectedLabels = [];
 
   @override
   void initState() {
@@ -42,6 +46,15 @@ class _RecordPageState extends State<RecordPage> {
     myFocusNode.dispose();
 
     super.dispose();
+  }
+
+  void resetUI() {
+    setState(() {
+      priceController.text = '';
+      remarkController.text = '';
+      selectedLabels = [];
+      moreFlag = false;
+    });
   }
 
   void doRecord() {
@@ -108,16 +121,15 @@ class _RecordPageState extends State<RecordPage> {
         'fromSubWalletID': fromWalletID,
         'toSubWalletID': toWalletID,
         'amount': price,
+        'remark': remarkController.text,
+        'labelIDs': selectedLabels.map((e) => e.id).toList(),
         'at': (curAt.millisecondsSinceEpoch / 1000).round(),
       }, onSuccess: (data) {
         AlertUtils.alertDialog(
           context: context,
           content: "记录成功，是否关闭",
         ).then((value) => {
-              if (value == 'ok')
-                {Navigator.pop(context, online)}
-              else
-                priceController.text = ''
+              if (value == 'ok') {Navigator.pop(context, online)} else resetUI()
             });
       }, onError: (error) {
         setState(() {
@@ -133,15 +145,14 @@ class _RecordPageState extends State<RecordPage> {
             toPersonName: toPersonName,
             costDir: dir,
             amount: price,
+            remark: remarkController.text,
+            labels: selectedLabels.map((e) => e.id).toList(),
             at: curAt));
         AlertUtils.alertDialog(
           context: context,
           content: "缓存成功, 记录将会在连接服务器后自动上传，是否关闭",
         ).then((value) => {
-              if (value == 'ok')
-                {Navigator.pop(context, online)}
-              else
-                priceController.text = ''
+              if (value == 'ok') {Navigator.pop(context, online)} else resetUI()
             });
       });
     }
@@ -156,11 +167,15 @@ class _RecordPageState extends State<RecordPage> {
           toPersonName: toPersonName,
           costDir: dir,
           amount: price,
+          remark: remarkController.text,
+          labels: selectedLabels.map((e) => e.id).toList(),
           at: curAt));
       AlertUtils.alertDialog(
         context: context,
         content: "缓存成功, 记录将会在连接服务器后自动上传，是否关闭",
-      ).then((value) => {if (value == 'ok') Navigator.pop(context, online)});
+      ).then((value) => {
+            if (value == 'ok') {Navigator.pop(context, online)} else resetUI()
+          });
     }
   }
 
@@ -279,6 +294,10 @@ class _RecordPageState extends State<RecordPage> {
     var from = fromSelectText();
     var to = toSelectText();
 
+    var labels = Global.baseInfo?.labels
+        .map((e) => MultiSelectItem<IDName>(e, e.name))
+        .toList();
+
     DateTime curAt = DateTime(
         at.getSingle(DateType.Year),
         at.getSingle(DateType.Month),
@@ -369,7 +388,48 @@ class _RecordPageState extends State<RecordPage> {
             ),
             IconButton(
               icon: const Icon(Icons.more_horiz, size: 24),
-              onPressed: () {},
+              onPressed: () {
+                setState(() {
+                  moreFlag = !moreFlag;
+                });
+              },
+            ),
+            Visibility(
+              visible: moreFlag,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                child: Column(children: [
+                  TextField(
+                    decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: '备注',
+                        hintText: '可选的备注'),
+                    controller: remarkController,
+                  ),
+                  Visibility(
+                    visible: moreFlag && labels != null,
+                    child: MultiSelectDialogField(
+                      listType: MultiSelectListType.CHIP,
+                      buttonText: const Text("选择标签"),
+                      title: const Text("标签"),
+                      initialValue: selectedLabels,
+                      items: labels!,
+                      onConfirm: (values) {
+                        selectedLabels =
+                            values.map((e) => e as IDName).toList();
+                      },
+                      chipDisplay: MultiSelectChipDisplay(
+                        onTap: (value) {
+                          setState(() {
+                            selectedLabels.remove(value);
+                          });
+                        },
+                      ),
+                    ),
+                  ),
+                ]),
+              ),
             ),
             const Icon(
               Icons.arrow_downward,
