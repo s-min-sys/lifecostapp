@@ -307,9 +307,10 @@ class _HomePageState extends State<HomePage> {
                   child: Text(
                     bill.remark,
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 14,
                       fontStyle: FontStyle.italic,
-                      color: Colors.grey,
+                      decoration: TextDecoration.underline,
+                      color: Colors.blue,
                     ),
                   ),
                 )),
@@ -320,7 +321,7 @@ class _HomePageState extends State<HomePage> {
             priceExWidget,
           ]),
           Visibility(
-            visible: bill.remark.isNotEmpty,
+            visible: bill.labelIDNames.isNotEmpty || bill.remark.length > 4,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Wrap(
