@@ -6,6 +6,7 @@ class AlertUtils {
       String title = '消息',
       okButtonText = '确定',
       cancelButtonText = '取消',
+      hideCancelButton = false,
       required content}) async {
     if (!context.mounted) {
       return;
@@ -23,11 +24,14 @@ class AlertUtils {
                     Navigator.of(context).pop("ok");
                   },
                   child: Text(okButtonText)),
-              TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop("cancel");
-                  },
-                  child: Text(cancelButtonText))
+              Visibility(
+                visible: !hideCancelButton,
+                child: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop("cancel");
+                    },
+                    child: Text(cancelButtonText)),
+              )
             ],
           );
         });

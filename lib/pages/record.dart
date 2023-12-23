@@ -116,6 +116,40 @@ class _RecordPageState extends State<RecordPage> {
         at.getSingle(DateType.Minute),
         at.getSingle(DateType.Second));
 
+    if (fromPersonID != Global.baseInfo?.selfWallets.personID &&
+        toPersonID != Global.baseInfo?.selfWallets.personID) {
+      AlertUtils.alertDialog(
+          context: context, content: '你没有参与的账就不要记录', hideCancelButton: true);
+
+      return;
+    }
+
+    if (fromPersonID == toPersonID) {
+      if (Global.baseInfo?.selfWallets.personID != fromPersonID) {
+        AlertUtils.alertDialog(
+            context: context, content: '你没有参与的账就不要记录', hideCancelButton: true);
+
+        return;
+      }
+
+      AlertUtils.alertDialog(context: context, content: '你确定是自己给自己转账么？')
+          .then((value) => {
+                if (value == 'ok')
+                  {
+                    realRecord(fromWalletID, toWalletID, price, fromWalletName,
+                        fromPersonName, toWalletName, toPersonName, dir, curAt)
+                  }
+              });
+
+      return;
+    }
+
+    realRecord(fromWalletID, toWalletID, price, fromWalletName, fromPersonName,
+        toWalletName, toPersonName, dir, curAt);
+  }
+
+  void realRecord(fromWalletID, toWalletID, price, fromWalletName,
+      fromPersonName, toWalletName, toPersonName, dir, curAt) {
     if (online) {
       NetUtils.requestHttp('/record', method: NetUtils.postMethod, data: {
         'fromSubWalletID': fromWalletID,

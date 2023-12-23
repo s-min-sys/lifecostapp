@@ -45,7 +45,7 @@ class NetUtils {
           'Content-Type': 'application/json',
           'token': token ?? "",
         },
-      );
+      ).timeout(const Duration(seconds: 6));
 
       if (response.statusCode == 200) {
         Map<String, dynamic> resp =
@@ -99,13 +99,15 @@ class NetUtils {
     try {
       EasyLoading.show(status: '加载中...', dismissOnTap: false);
 
-      final response = await http.post(getUri(url, parameters),
-          headers: {
-            'Accept': 'application/json,*/*',
-            'Content-Type': 'application/json',
-            'token': token ?? "",
-          },
-          body: jsonEncode(data));
+      final response = await http
+          .post(getUri(url, parameters),
+              headers: {
+                'Accept': 'application/json,*/*',
+                'Content-Type': 'application/json',
+                'token': token ?? "",
+              },
+              body: jsonEncode(data))
+          .timeout(const Duration(seconds: 6));
 
       if (response.statusCode == 200) {
         Map<String, dynamic> resp =

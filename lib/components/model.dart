@@ -294,13 +294,17 @@ class GetRecordsResp {
   final Statistics dayStatistics;
   final Statistics weekStatistics;
   final Statistics monthStatistics;
+  final Statistics seasonStatistics;
+  final Statistics yearStatistics;
 
   const GetRecordsResp(
       {required this.bills,
       required this.hasMore,
       required this.dayStatistics,
       required this.weekStatistics,
-      required this.monthStatistics});
+      required this.monthStatistics,
+      required this.seasonStatistics,
+      required this.yearStatistics});
 
   factory GetRecordsResp.fromJson(Map<String, dynamic> json) {
     return GetRecordsResp(
@@ -311,6 +315,14 @@ class GetRecordsResp {
       dayStatistics: Statistics.fromJson(json['dayStatistics']),
       weekStatistics: Statistics.fromJson(json['weekStatistics']),
       monthStatistics: Statistics.fromJson(json['monthStatistics']),
+      seasonStatistics: json.containsKey('seasonStatistics') &&
+              json['seasonStatistics'] != null
+          ? Statistics.fromJson(json['seasonStatistics'])
+          : Statistics.empty(),
+      yearStatistics:
+          json.containsKey('yearStatistics') && json['yearStatistics'] != null
+              ? Statistics.fromJson(json['yearStatistics'])
+              : Statistics.empty(),
     );
   }
 
@@ -320,7 +332,9 @@ class GetRecordsResp {
         hasMore: false,
         dayStatistics: Statistics.empty(),
         weekStatistics: Statistics.empty(),
-        monthStatistics: Statistics.empty());
+        monthStatistics: Statistics.empty(),
+        seasonStatistics: Statistics.empty(),
+        yearStatistics: Statistics.empty());
   }
 }
 

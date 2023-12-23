@@ -10,6 +10,7 @@ import 'package:lifecostapp/helper/netutils.dart';
 import 'package:lifecostapp/pages/login.dart';
 import 'package:lifecostapp/pages/record.dart';
 import 'package:lifecostapp/pages/walletadd.dart';
+import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:toastification/toastification.dart';
 
 class HomePage extends StatefulWidget {
@@ -27,10 +28,17 @@ class _HomePageState extends State<HomePage> {
   Statistics dayStatistics = Statistics.empty();
   Statistics weekStatistics = Statistics.empty();
   Statistics monthStatistics = Statistics.empty();
+  Statistics seasonStatistics = Statistics.empty();
+  Statistics yearStatistics = Statistics.empty();
   IndicatorController controller = IndicatorController();
 
   final ScrollController _scrollController = ScrollController();
   bool isLoading = false;
+  bool statByLables = false;
+  List<IDName> selectedLabels = [];
+  MultiSelectItem<IDName> noLabelData =
+      MultiSelectItem<IDName>(const IDName(id: '', name: ''), '所有无标签数据');
+  List<MultiSelectItem<IDName>> labels = [];
 
   void flushRecords() {
     if (widget.online) {
@@ -54,11 +62,18 @@ class _HomePageState extends State<HomePage> {
       recordID = items[items.length - 1].id;
     }
 
+    List<String>? labels;
+    if (statByLables) {
+      labels = selectedLabels.map((e) => e.id).toList();
+    }
+
     NetUtils.requestHttp('/records', method: NetUtils.postMethod, parameters: {
       'flag': '1',
     }, data: {
       'recordID': recordID,
       'pageCount': 4,
+      'requestStat': true,
+      'statLabelIDs': labels,
     }, onSuccess: (data) {
       var newRecords = GetRecordsResp.fromJson(data);
       setState(() {
@@ -67,6 +82,8 @@ class _HomePageState extends State<HomePage> {
         dayStatistics = newRecords.dayStatistics;
         weekStatistics = newRecords.weekStatistics;
         monthStatistics = newRecords.monthStatistics;
+        seasonStatistics = newRecords.seasonStatistics;
+        yearStatistics = newRecords.yearStatistics;
         if (newRecords.bills.isNotEmpty) {
           toastification.show(
             context: context,
@@ -112,12 +129,19 @@ class _HomePageState extends State<HomePage> {
       newForward = false;
     }
 
-    NetUtils.requestHttp('records', method: NetUtils.postMethod, parameters: {
+    List<String>? labels;
+    if (statByLables) {
+      labels = selectedLabels.map((e) => e.id).toList();
+    }
+
+    NetUtils.requestHttp('/records', method: NetUtils.postMethod, parameters: {
       'flag': '1',
     }, data: {
       'recordID': recordID,
       'pageCount': 10,
       'newForward': newForward,
+      'requestStat': true,
+      'statLabelIDs': labels,
     }, onSuccess: (data) {
       var newRecords = GetRecordsResp.fromJson(data);
 
@@ -132,6 +156,8 @@ class _HomePageState extends State<HomePage> {
       dayStatistics = newRecords.dayStatistics;
       weekStatistics = newRecords.weekStatistics;
       monthStatistics = newRecords.monthStatistics;
+      seasonStatistics = newRecords.seasonStatistics;
+      yearStatistics = newRecords.yearStatistics;
       if (newRecords.bills.isNotEmpty) {
         toastification.show(
           context: context,
@@ -501,6 +527,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    labels = [noLabelData];
+    var labelsA = Global.baseInfo?.labels
+        .map((e) => MultiSelectItem<IDName>(e, e.name))
+        .toList();
+    if (labelsA != null) {
+      labels.addAll(labelsA);
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
@@ -572,6 +606,50 @@ class _HomePageState extends State<HomePage> {
                       }),
               const Divider(),
               ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.wallet_sharp)),
+                  title: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Text('统计 - 按标签显示'),
+                            Switch(
+                              value: statByLables,
+                              onChanged: (bool value) {
+                                setState(() {
+                                  statByLables = value;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        Visibility(
+                          visible: statByLables,
+                          child: MultiSelectDialogField(
+                            listType: MultiSelectListType.CHIP,
+                            buttonText: const Text("选择标签"),
+                            title: const Text("标签"),
+                            initialValue: selectedLabels,
+                            items: labels,
+                            onConfirm: (values) {
+                              selectedLabels =
+                                  values.map((e) => e as IDName).toList();
+                            },
+                            chipDisplay: MultiSelectChipDisplay(
+                              onTap: (value) {
+                                setState(() {
+                                  selectedLabels.remove(value);
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ]),
+                  onTap: () => {
+                        toWalletAddPage(),
+                      }),
+              const Divider(),
+              ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.logout)),
                   title: const Text("退出"),
                   onTap: () => {doLogout()}),
@@ -596,6 +674,10 @@ class _HomePageState extends State<HomePage> {
                       statisticsWidget('周统计', weekStatistics),
                       const SizedBox(width: 2),
                       statisticsWidget('月统计', monthStatistics),
+                      const SizedBox(width: 2),
+                      statisticsWidget('季统计', seasonStatistics),
+                      const SizedBox(width: 2),
+                      statisticsWidget('年统计', yearStatistics),
                     ],
                   ),
                 ),
