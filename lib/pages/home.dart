@@ -536,6 +536,50 @@ class _HomePageState extends State<HomePage> {
     ]);
   }
 
+  Widget recordIteWithWrapper(int index) {
+    if (!Global.enableDelete) {
+      return recordItemUI(items[index]);
+    }
+
+    return Dismissible(
+        key: Key(items[index].id),
+        background: Container(
+            color: Colors.red,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 16),
+                  child: DefaultTextStyle(
+                    style: const TextStyle(
+                      fontSize: 20.0,
+                    ),
+                    child: AnimatedTextKit(
+                      animatedTexts: [
+                        WavyAnimatedText('左滑删除'),
+                      ],
+                      isRepeatingAnimation: true,
+                    ),
+                  ),
+                )
+              ],
+            )),
+        confirmDismiss: (DismissDirection direction) async {
+          if (direction != DismissDirection.endToStart) {
+            return Future(() => false);
+          }
+          return await AlertUtils.alertDialog(
+                  context: context, content: '确定要删除当前记录么？') ==
+              'ok';
+        },
+        onDismissed: (direction) {
+          if (direction != DismissDirection.endToStart) {}
+          removeRecrod(items[index].id);
+          items.removeAt(index);
+        },
+        child: recordItemUI(items[index]));
+  }
+
   @override
   Widget build(BuildContext context) {
     labels = [noLabelData];
@@ -589,6 +633,16 @@ class _HomePageState extends State<HomePage> {
                       (route) => false);
                 },
                 value: Global.devMode,
+              ),
+              const Divider(),
+              CheckboxListTile(
+                title: const Text('允许删除记录'),
+                onChanged: (bool? value) {
+                  setState(() {
+                    Global.enableDelete = value!;
+                  });
+                },
+                value: Global.enableDelete,
               ),
               const Divider(),
               ListTile(
@@ -732,45 +786,7 @@ class _HomePageState extends State<HomePage> {
                 itemCount: items.length + (isLoading ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index < items.length) {
-                    return Dismissible(
-                        key: Key(items[index].id),
-                        background: Container(
-                            color: Colors.red,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 16),
-                                  child: DefaultTextStyle(
-                                    style: const TextStyle(
-                                      fontSize: 20.0,
-                                    ),
-                                    child: AnimatedTextKit(
-                                      animatedTexts: [
-                                        WavyAnimatedText('滑动删除'),
-                                      ],
-                                      isRepeatingAnimation: true,
-                                    ),
-                                  ),
-                                )
-                              ],
-                            )),
-                        confirmDismiss: (DismissDirection direction) async {
-                          if (direction != DismissDirection.endToStart) {
-                            return Future(() => false);
-                          }
-                          return await AlertUtils.alertDialog(
-                                  context: context,
-                                  content:
-                                      '确定要删除${items[index].fromSubWalletName}这个记录么？') ==
-                              'ok';
-                        },
-                        onDismissed: (direction) {
-                          if (direction != DismissDirection.endToStart) {}
-                          removeRecrod(items[index].id);
-                          items.removeAt(index);
-                        },
-                        child: recordItemUI(items[index]));
+                    return recordIteWithWrapper(index);
                   } else {
                     return const Padding(
                       padding: EdgeInsets.all(16.0),

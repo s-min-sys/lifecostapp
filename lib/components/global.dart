@@ -8,6 +8,7 @@ class Global {
 
   static BaseInfo? _baseInfo;
   static bool devMode = false;
+  static bool enableDelete = false;
 
   static SharedPreferences? gSP;
 
