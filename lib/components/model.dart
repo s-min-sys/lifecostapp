@@ -65,8 +65,8 @@ class MerchantWallets {
     return map;
   }
 
-  List toNameD() {
-    List l = [];
+  List<String> toNameD() {
+    List<String> l = [];
     for (int idx = 0; idx < wallets.length; idx++) {
       l.add(wallets[idx].name);
     }
@@ -74,8 +74,8 @@ class MerchantWallets {
     return l;
   }
 
-  List toIDD() {
-    List l = [];
+  List<String> toIDD() {
+    List<String> l = [];
     for (int idx = 0; idx < wallets.length; idx++) {
       l.add(wallets[idx].id);
     }
@@ -85,8 +85,8 @@ class MerchantWallets {
 }
 
 class PickerData {
-  final Map ids;
-  final Map names;
+  final Map<String, List<String>> ids;
+  final Map<String, List<String>> names;
   List<int> selected;
 
   PickerData(this.ids, this.names, this.selected);
@@ -103,6 +103,37 @@ class PickerData {
     return [
       names.keys.elementAt(selected[0]),
       names.values.elementAt(selected[0])[selected[1]]
+    ];
+  }
+
+  void adjustSelected(String personID, String walletID) {
+    var selectPersonIndex = -1, selectedWalletIndex = 1;
+
+    for (var idx = 0; idx < ids.keys.length; idx++) {
+      if (ids.keys.elementAt(idx) == personID) {
+        selectPersonIndex = idx;
+
+        for (var i = 0; i < ids.values.elementAt(idx).length; i++) {
+          if (ids.values.elementAt(idx).elementAt(i) == walletID) {
+            selectedWalletIndex = i;
+          }
+        }
+      }
+    }
+
+    if (selectPersonIndex != -1 && selectedWalletIndex != -1) {
+      selected = [selectPersonIndex, selectedWalletIndex];
+    }
+  }
+
+  List<String> getSelectedIDs() {
+    if (selected.length != 2) {
+      return [];
+    }
+
+    return [
+      ids.keys.elementAt(selected[0]),
+      ids.values.elementAt(selected[0]).elementAt(selected[1])
     ];
   }
 }
@@ -144,7 +175,7 @@ class BaseInfo {
   }
 
   PickerData toPickerData(bool fromRequest) {
-    Map idM = {}, nameM = {};
+    Map<String, List<String>> idM = {}, nameM = {};
     List<int> selected = [];
 
     for (int idx = 0; idx < merchantWallets.length; idx++) {

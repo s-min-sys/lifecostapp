@@ -213,6 +213,24 @@ class _RecordPageState extends State<RecordPage> {
     }
   }
 
+  void saveFromSelecteIDs() {
+    var ids = fromPickerData?.getSelectedIDs();
+    if (ids == null) {
+      return;
+    }
+
+    Global.setLastRecordFromSelectedIDs(ids);
+  }
+
+  void saveToSelecteIDs() {
+    var ids = toPickerData?.getSelectedIDs();
+    if (ids == null) {
+      return;
+    }
+
+    Global.setLastRecordToSelectedIDs(ids);
+  }
+
   List<String> fromSelectText() {
     var baseInfo = Global.baseInfo;
     if (baseInfo == null) {
@@ -230,6 +248,11 @@ class _RecordPageState extends State<RecordPage> {
     }
 
     fromPickerData = pickerData;
+
+    var selectIDs = Global.getLastRecordFromSelectedIDs();
+    if (selectIDs != null && selectIDs.length == 2) {
+      fromPickerData?.adjustSelected(selectIDs[0], selectIDs[1]);
+    }
 
     return [
       pickerData.names.keys.elementAt(pickerData.selected[0]),
@@ -255,6 +278,11 @@ class _RecordPageState extends State<RecordPage> {
     }
 
     toPickerData = pickerData;
+
+    var selectIDs = Global.getLastRecordToSelectedIDs();
+    if (selectIDs != null && selectIDs.length == 2) {
+      toPickerData?.adjustSelected(selectIDs[0], selectIDs[1]);
+    }
 
     return [
       pickerData.names.keys.elementAt(pickerData.selected[0]),
@@ -305,8 +333,10 @@ class _RecordPageState extends State<RecordPage> {
       setState(() {
         if (fromRequest) {
           fromPickerData?.selected = position;
+          saveFromSelecteIDs();
         } else {
           toPickerData?.selected = position;
+          saveToSelecteIDs();
         }
       });
       myFocusNode.requestFocus();

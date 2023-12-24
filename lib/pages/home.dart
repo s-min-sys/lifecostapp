@@ -1,3 +1,4 @@
+import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -260,7 +261,7 @@ class _HomePageState extends State<HomePage> {
     return widgets;
   }
 
-  Widget? recordItemUI(Bill bill) {
+  Widget recordItemUI(Bill bill) {
     List<Widget> wLeft = [], wRight = [];
     IconData dirIcon = Icons.arrow_downward_outlined;
     Color dirColor = Colors.grey,
@@ -503,6 +504,17 @@ class _HomePageState extends State<HomePage> {
     return baseInfo.selfWallets.personName;
   }
 
+  void removeRecrod(String id) {
+    NetUtils.requestHttp('/record/delete/$id',
+        method: NetUtils.postMethod, data: {}, onSuccess: (data) {
+      toastification.show(
+        context: context,
+        title: '删除记录成功',
+        autoCloseDuration: const Duration(seconds: 2),
+      );
+    }, onError: (error) {});
+  }
+
   Widget title() {
     if (widget.online) {
       return const Text('生活消费');
@@ -717,11 +729,48 @@ class _HomePageState extends State<HomePage> {
                 );
               },
               child: ListView.builder(
-                //controller: _scrollController,
                 itemCount: items.length + (isLoading ? 1 : 0),
                 itemBuilder: (context, index) {
                   if (index < items.length) {
-                    return recordItemUI(items[index]);
+                    return Dismissible(
+                        key: Key(items[index].id),
+                        background: Container(
+                            color: Colors.red,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 16),
+                                  child: DefaultTextStyle(
+                                    style: const TextStyle(
+                                      fontSize: 20.0,
+                                    ),
+                                    child: AnimatedTextKit(
+                                      animatedTexts: [
+                                        WavyAnimatedText('滑动删除'),
+                                      ],
+                                      isRepeatingAnimation: true,
+                                    ),
+                                  ),
+                                )
+                              ],
+                            )),
+                        confirmDismiss: (DismissDirection direction) async {
+                          if (direction != DismissDirection.endToStart) {
+                            return Future(() => false);
+                          }
+                          return await AlertUtils.alertDialog(
+                                  context: context,
+                                  content:
+                                      '确定要删除${items[index].fromSubWalletName}这个记录么？') ==
+                              'ok';
+                        },
+                        onDismissed: (direction) {
+                          if (direction != DismissDirection.endToStart) {}
+                          removeRecrod(items[index].id);
+                          items.removeAt(index);
+                        },
+                        child: recordItemUI(items[index]));
                   } else {
                     return const Padding(
                       padding: EdgeInsets.all(16.0),

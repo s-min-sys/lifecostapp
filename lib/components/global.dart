@@ -83,4 +83,20 @@ class Global {
 
     return (json.decode(s) as List).map((e) => IDName.fromJson(e)).toList();
   }
+
+  static void setLastRecordFromSelectedIDs(List<String> ids) {
+    gSP?.setStringList('lastRecordFromSelectedIDs', ids);
+  }
+
+  static List<String>? getLastRecordFromSelectedIDs() {
+    return gSP?.getStringList('lastRecordFromSelectedIDs');
+  }
+
+  static void setLastRecordToSelectedIDs(List<String> ids) {
+    gSP?.setStringList('lastRecordToSelectedIDs', ids);
+  }
+
+  static List<String>? getLastRecordToSelectedIDs() {
+    return gSP?.getStringList('lastRecordToSelectedIDs');
+  }
 }
