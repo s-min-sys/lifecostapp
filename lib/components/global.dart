@@ -62,4 +62,25 @@ class Global {
   static void removeCachedRecordList() {
     gSP?.remove('cached-records');
   }
+
+  static void savetStatByLables(bool statByLables) {
+    gSP?.setBool('statByLables', statByLables);
+  }
+
+  static void savettatLabelIDs(List<IDName> statLabelIDs) {
+    gSP?.setString('statLabelIDs', json.encode(statLabelIDs));
+  }
+
+  static bool getStatByLables() {
+    return gSP?.getBool('statByLables') ?? false;
+  }
+
+  static List<IDName> getStatLabelIDs() {
+    var s = gSP?.getString('statLabelIDs');
+    if (s == null) {
+      return [];
+    }
+
+    return (json.decode(s) as List).map((e) => IDName.fromJson(e)).toList();
+  }
 }

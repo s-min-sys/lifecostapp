@@ -39,6 +39,7 @@ class _HomePageState extends State<HomePage> {
   MultiSelectItem<IDName> noLabelData =
       MultiSelectItem<IDName>(const IDName(id: '', name: ''), '所有无标签数据');
   List<MultiSelectItem<IDName>> labels = [];
+  bool statConditionChanged = false;
 
   void flushRecords() {
     if (widget.online) {
@@ -57,11 +58,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void flushRecords4Onlne() {
-    String recordID = '';
-    if (items.isNotEmpty) {
-      recordID = items[items.length - 1].id;
-    }
-
     List<String>? labels;
     if (statByLables) {
       labels = selectedLabels.map((e) => e.id).toList();
@@ -70,8 +66,7 @@ class _HomePageState extends State<HomePage> {
     NetUtils.requestHttp('/records', method: NetUtils.postMethod, parameters: {
       'flag': '1',
     }, data: {
-      'recordID': recordID,
-      'pageCount': 4,
+      'pageCount': 10,
       'requestStat': true,
       'statLabelIDs': labels,
     }, onSuccess: (data) {
@@ -195,6 +190,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
+    statByLables = Global.getStatByLables();
+    selectedLabels = Global.getStatLabelIDs();
+
     _scrollController.addListener(_loadMore);
     flushRecords();
 
@@ -535,11 +534,28 @@ class _HomePageState extends State<HomePage> {
       labels.addAll(labelsA);
     }
 
+    for (var i = 0; i < labels.length; i++) {
+      for (var idx = 0; idx < selectedLabels.length; idx++) {
+        if (selectedLabels[idx].id == labels[i].value.id) {
+          selectedLabels[idx] = labels[i].value;
+          break;
+        }
+      }
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: title(),
       ),
+      onDrawerChanged: (bool isOpened) {
+        if (!isOpened) {
+          if (statConditionChanged) {
+            statConditionChanged = false;
+            flushRecords();
+          }
+        }
+      },
       drawer: Drawer(
         child: SingleChildScrollView(
           child: Column(
@@ -616,6 +632,8 @@ class _HomePageState extends State<HomePage> {
                             Switch(
                               value: statByLables,
                               onChanged: (bool value) {
+                                Global.savetStatByLables(value);
+                                statConditionChanged = true;
                                 setState(() {
                                   statByLables = value;
                                 });
@@ -634,14 +652,12 @@ class _HomePageState extends State<HomePage> {
                             onConfirm: (values) {
                               selectedLabels =
                                   values.map((e) => e as IDName).toList();
+                              statConditionChanged = true;
+                              setState(() {});
+
+                              Global.savettatLabelIDs(selectedLabels);
                             },
-                            chipDisplay: MultiSelectChipDisplay(
-                              onTap: (value) {
-                                setState(() {
-                                  selectedLabels.remove(value);
-                                });
-                              },
-                            ),
+                            chipDisplay: MultiSelectChipDisplay(),
                           ),
                         ),
                       ]),
@@ -651,7 +667,7 @@ class _HomePageState extends State<HomePage> {
               const Divider(),
               ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.logout)),
-                  title: const Text("退出"),
+                  title: const Text("注销用户"),
                   onTap: () => {doLogout()}),
             ],
           ),
