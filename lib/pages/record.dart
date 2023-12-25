@@ -55,6 +55,7 @@ class _RecordPageState extends State<RecordPage> {
       selectedLabels = [];
       moreFlag = false;
     });
+    myFocusNode.requestFocus();
   }
 
   void doRecord() {
@@ -374,6 +375,10 @@ class _RecordPageState extends State<RecordPage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(title()),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(online),
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(

@@ -553,3 +553,74 @@ class Record4Commit {
     return map;
   }
 }
+
+class DeletedBill {
+  final Bill bill;
+  final String deletedAt;
+
+  const DeletedBill({
+    required this.bill,
+    required this.deletedAt,
+  });
+
+  factory DeletedBill.fromJson(Map<String, dynamic> json) {
+    return DeletedBill(bill: Bill.fromJson(json), deletedAt: json['deletedAt']);
+  }
+}
+
+class GetDeletedRecordsResp {
+  final List<DeletedBill> bills;
+
+  const GetDeletedRecordsResp({
+    required this.bills,
+  });
+
+  factory GetDeletedRecordsResp.fromJson(Map<String, dynamic> json) {
+    return GetDeletedRecordsResp(
+        bills: json['bills'] == null
+            ? []
+            : (json['bills'] as List)
+                .map((e) => DeletedBill.fromJson(e))
+                .toList());
+  }
+}
+
+class DeleteRecordResp {
+  final Statistics dayStatistics;
+  final Statistics weekStatistics;
+  final Statistics monthStatistics;
+  final Statistics seasonStatistics;
+  final Statistics yearStatistics;
+
+  const DeleteRecordResp(
+      {required this.dayStatistics,
+      required this.weekStatistics,
+      required this.monthStatistics,
+      required this.seasonStatistics,
+      required this.yearStatistics});
+
+  factory DeleteRecordResp.fromJson(Map<String, dynamic> json) {
+    return DeleteRecordResp(
+      dayStatistics: Statistics.fromJson(json['dayStatistics']),
+      weekStatistics: Statistics.fromJson(json['weekStatistics']),
+      monthStatistics: Statistics.fromJson(json['monthStatistics']),
+      seasonStatistics: json.containsKey('seasonStatistics') &&
+              json['seasonStatistics'] != null
+          ? Statistics.fromJson(json['seasonStatistics'])
+          : Statistics.empty(),
+      yearStatistics:
+          json.containsKey('yearStatistics') && json['yearStatistics'] != null
+              ? Statistics.fromJson(json['yearStatistics'])
+              : Statistics.empty(),
+    );
+  }
+
+  factory DeleteRecordResp.empty() {
+    return DeleteRecordResp(
+        dayStatistics: Statistics.empty(),
+        weekStatistics: Statistics.empty(),
+        monthStatistics: Statistics.empty(),
+        seasonStatistics: Statistics.empty(),
+        yearStatistics: Statistics.empty());
+  }
+}
