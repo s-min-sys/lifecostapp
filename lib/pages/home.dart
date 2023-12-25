@@ -505,7 +505,7 @@ class _HomePageState extends State<HomePage> {
                       }),
               const Divider(),
               ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.wallet_sharp)),
+                  leading: const CircleAvatar(child: Icon(Icons.api)),
                   title: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
@@ -549,7 +549,7 @@ class _HomePageState extends State<HomePage> {
                       }),
               const Divider(),
               ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.logout)),
+                  leading: const CircleAvatar(child: Icon(Icons.recycling)),
                   title: const Text("查看删除记录"),
                   onTap: () => {toDeletedRecordsPage()}),
               const Divider(),
@@ -557,6 +557,7 @@ class _HomePageState extends State<HomePage> {
                   leading: const CircleAvatar(child: Icon(Icons.logout)),
                   title: const Text("注销用户"),
                   onTap: () => {doLogout()}),
+              const SizedBox(height: 30),
             ],
           ),
         ),
