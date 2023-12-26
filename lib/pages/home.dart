@@ -12,6 +12,7 @@ import 'package:lifecostapp/helper/netutils.dart';
 import 'package:lifecostapp/pages/deletedrecords.dart';
 import 'package:lifecostapp/pages/login.dart';
 import 'package:lifecostapp/pages/record.dart';
+import 'package:lifecostapp/pages/stat.dart';
 import 'package:lifecostapp/pages/walletadd.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 import 'package:toastification/toastification.dart';
@@ -552,6 +553,16 @@ class _HomePageState extends State<HomePage> {
                   leading: const CircleAvatar(child: Icon(Icons.recycling)),
                   title: const Text("查看删除记录"),
                   onTap: () => {toDeletedRecordsPage()}),
+              const Divider(),
+              ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.recycling)),
+                  title: const Text("年统计"),
+                  onTap: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => StatPage()),
+                        )
+                      }),
               const Divider(),
               ListTile(
                   leading: const CircleAvatar(child: Icon(Icons.logout)),

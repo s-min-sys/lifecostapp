@@ -624,3 +624,121 @@ class DeleteRecordResp {
         yearStatistics: Statistics.empty());
   }
 }
+
+class LifeCostTotalData {
+  final int consumeCount;
+  final int consumeAmount;
+  final int earnCount;
+  final int earnAmount;
+
+  const LifeCostTotalData(
+      {required this.consumeCount,
+      required this.consumeAmount,
+      required this.earnCount,
+      required this.earnAmount});
+
+  factory LifeCostTotalData.fromJson(Map<String, dynamic> json) {
+    return LifeCostTotalData(
+      consumeCount:
+          json.containsKey('consume_count') ? json['consume_count'] : 0,
+      consumeAmount:
+          json.containsKey('consume_amount') ? json['consume_amount'] : 0,
+      earnCount: json.containsKey('earn_count') ? json['earn_count'] : 0,
+      earnAmount: json.containsKey('earn_amount') ? json['earn_amount'] : 0,
+    );
+  }
+}
+
+class StatWeekDay {
+  final int weekDay;
+  final int monthDay;
+  final LifeCostTotalData stat;
+
+  const StatWeekDay(
+      {required this.weekDay, required this.monthDay, required this.stat});
+
+  factory StatWeekDay.fromJson(Map<String, dynamic> json) {
+    return StatWeekDay(
+      weekDay: json['weekDay'],
+      monthDay: json['monthDay'],
+      stat: LifeCostTotalData.fromJson(json['stat']),
+    );
+  }
+}
+
+class StatWeek {
+  final int week;
+  final LifeCostTotalData stat;
+  final List<StatWeekDay> days;
+
+  const StatWeek({required this.week, required this.stat, required this.days});
+
+  factory StatWeek.fromJson(Map<String, dynamic> json) {
+    return StatWeek(
+      week: json['week'],
+      stat: LifeCostTotalData.fromJson(json['stat']),
+      days: json.containsKey('days') && json['days'] != null
+          ? (json['days'] as List).map((e) => StatWeekDay.fromJson(e)).toList()
+          : [],
+    );
+  }
+}
+
+class StatMonth {
+  final int month;
+  final LifeCostTotalData stat;
+  final List<StatWeek> weeks;
+
+  const StatMonth(
+      {required this.month, required this.stat, required this.weeks});
+
+  factory StatMonth.fromJson(Map<String, dynamic> json) {
+    return StatMonth(
+      month: json['month'],
+      stat: LifeCostTotalData.fromJson(json['stat']),
+      weeks: json.containsKey('weeks') && json['weeks'] != null
+          ? (json['weeks'] as List).map((e) => StatWeek.fromJson(e)).toList()
+          : [],
+    );
+  }
+}
+
+class StatSeason {
+  final int season;
+  final LifeCostTotalData stat;
+  final List<StatMonth> months;
+
+  const StatSeason(
+      {required this.season, required this.stat, required this.months});
+
+  factory StatSeason.fromJson(Map<String, dynamic> json) {
+    return StatSeason(
+      season: json['season'],
+      stat: LifeCostTotalData.fromJson(json['stat']),
+      months: json.containsKey('months') && json['months'] != null
+          ? (json['months'] as List).map((e) => StatMonth.fromJson(e)).toList()
+          : [],
+    );
+  }
+}
+
+class StatYear {
+  final int year;
+  final LifeCostTotalData stat;
+  final List<StatSeason> seasons;
+
+  const StatYear(
+      {required this.year, required this.stat, required this.seasons});
+
+  factory StatYear.fromJson(Map<String, dynamic> json) {
+    return StatYear(
+      year: json['year'],
+      stat: LifeCostTotalData.fromJson(json['stat']),
+      seasons: json.containsKey('seasons') && json['seasons'] != null
+          ? (json['seasons'] as List)
+              .map((e) => StatSeason.fromJson(e))
+              .toList()
+          : [],
+    );
+  }
+}
