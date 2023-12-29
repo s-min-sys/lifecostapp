@@ -149,7 +149,7 @@ class _StatPageState extends State<StatPage> {
     f = node.data is StatWeekDay;
     if (f) {
       var v = node.data as StatWeekDay;
-      return statisticsWidget('周${v.weekDay} [${v.monthDay}号]', v.stat);
+      return statisticsWidget(weekDayTitle(v), v.stat);
     }
 
     return const Text('呵呵');
@@ -226,6 +226,10 @@ class _StatPageState extends State<StatPage> {
     }, onReLogin: () {
       Share.doLogout(context);
     });
+  }
+
+  String weekDayTitle(StatWeekDay day) {
+    return '${weekDayString(day.weekDay)} [${day.monthDay}号]';
   }
 
   Widget? buildMainPanel() {
@@ -350,7 +354,7 @@ class _StatPageState extends State<StatPage> {
 
       if (weekDay == 0) {
         widgets
-            .addAll(statWeek.days.map((e) => fnUI('周${e.weekDay}', e.stat, () {
+            .addAll(statWeek.days.map((e) => fnUI(weekDayTitle(e), e.stat, () {
                   weekDay = e.weekDay;
                 })));
 
@@ -362,7 +366,7 @@ class _StatPageState extends State<StatPage> {
         return widgets;
       }
 
-      widgets.add(fnTinyUI('周${statWeekDay.weekDay}', statWeekDay.stat, () {
+      widgets.add(fnTinyUI(weekDayTitle(statWeekDay), statWeekDay.stat, () {
         weekDay = 0;
       }));
 
@@ -400,8 +404,32 @@ class _StatPageState extends State<StatPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('统计'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => {Navigator.of(context).pop()},
+        ),
       ),
-      body: SingleChildScrollView(child: buildMainPanel()),
+      body: WillPopScope(
+          onWillPop: () async {
+            if (weekDay != 0) {
+              weekDay = 0;
+            } else if (week != 0) {
+              week = 0;
+            } else if (month != 0) {
+              month = 0;
+            } else if (season != 0) {
+              season = 0;
+            } else if (year != 0) {
+              year = 0;
+            } else {
+              return true;
+            }
+
+            setState(() {});
+
+            return false;
+          },
+          child: SingleChildScrollView(child: buildMainPanel())),
     );
   }
 }
