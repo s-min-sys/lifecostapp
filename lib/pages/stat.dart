@@ -155,11 +155,11 @@ class _StatPageState extends State<StatPage> {
     return const Text('呵呵');
   }
 
-  int year = 0;
-  int season = 0;
-  int month = 0;
-  int week = 0;
-  int weekDay = 0;
+  int year = -1;
+  int season = -1;
+  int month = -1;
+  int week = -1;
+  int weekDay = -1;
 
   StatYear? getYearData(int year) {
     for (var idx = 0; idx < statistics.length; idx++) {
@@ -259,14 +259,14 @@ class _StatPageState extends State<StatPage> {
     }
 
     List<Widget> dateUIs() {
-      if (year == 0) {
+      if (year == -1) {
         return statistics
             .map((e) => fnUI('${e.year}年', e.stat, () {
                   year = e.year;
-                  season = 0;
-                  month = 0;
-                  week = 0;
-                  weekDay = 0;
+                  season = -1;
+                  month = -1;
+                  week = -1;
+                  weekDay = -1;
                 }))
             .toList();
       }
@@ -279,20 +279,20 @@ class _StatPageState extends State<StatPage> {
       }
 
       widgets.add(fnTinyUI('${statYear.year}年', statYear.stat, () {
-        year = 0;
-        season = 0;
-        month = 0;
-        week = 0;
-        weekDay = 0;
+        year = -1;
+        season = -1;
+        month = -1;
+        week = -1;
+        weekDay = -1;
       }));
 
-      if (season == 0) {
+      if (season == -1) {
         widgets.addAll(
             statYear.seasons.map((e) => fnUI('第${e.season}季', e.stat, () {
                   season = e.season;
-                  month = 0;
-                  week = 0;
-                  weekDay = 0;
+                  month = -1;
+                  week = -1;
+                  weekDay = -1;
                 })));
 
         return widgets;
@@ -304,18 +304,18 @@ class _StatPageState extends State<StatPage> {
       }
 
       widgets.add(fnTinyUI('第${statSeason.season}季', statSeason.stat, () {
-        season = 0;
-        month = 0;
-        week = 0;
-        weekDay = 0;
+        season = -1;
+        month = -1;
+        week = -1;
+        weekDay = -1;
       }));
 
-      if (month == 0) {
+      if (month == -1) {
         widgets.addAll(
             statSeason.months.map((e) => fnUI('${e.month}月', e.stat, () {
                   month = e.month;
-                  week = 0;
-                  weekDay = 0;
+                  week = -1;
+                  weekDay = -1;
                 })));
 
         return widgets;
@@ -327,16 +327,16 @@ class _StatPageState extends State<StatPage> {
       }
 
       widgets.add(fnTinyUI('${statMonth.month}月', statMonth.stat, () {
-        month = 0;
-        week = 0;
-        weekDay = 0;
+        month = -1;
+        week = -1;
+        weekDay = -1;
       }));
 
-      if (week == 0) {
+      if (week == -1) {
         widgets
             .addAll(statMonth.weeks.map((e) => fnUI('第${e.week}周', e.stat, () {
                   week = e.week;
-                  weekDay = 0;
+                  weekDay = -1;
                 })));
 
         return widgets;
@@ -348,11 +348,11 @@ class _StatPageState extends State<StatPage> {
       }
 
       widgets.add(fnTinyUI('第${statWeek.week}周', statWeek.stat, () {
-        week = 0;
-        weekDay = 0;
+        week = -1;
+        weekDay = -1;
       }));
 
-      if (weekDay == 0) {
+      if (weekDay == -1) {
         widgets
             .addAll(statWeek.days.map((e) => fnUI(weekDayTitle(e), e.stat, () {
                   weekDay = e.weekDay;
@@ -367,7 +367,7 @@ class _StatPageState extends State<StatPage> {
       }
 
       widgets.add(fnTinyUI(weekDayTitle(statWeekDay), statWeekDay.stat, () {
-        weekDay = 0;
+        weekDay = -1;
       }));
 
       List<Widget> detailWidgets = [];
@@ -411,16 +411,16 @@ class _StatPageState extends State<StatPage> {
       ),
       body: WillPopScope(
           onWillPop: () async {
-            if (weekDay != 0) {
-              weekDay = 0;
-            } else if (week != 0) {
-              week = 0;
-            } else if (month != 0) {
-              month = 0;
-            } else if (season != 0) {
-              season = 0;
-            } else if (year != 0) {
-              year = 0;
+            if (weekDay != -1) {
+              weekDay = -1;
+            } else if (week != -1) {
+              week = -1;
+            } else if (month != -1) {
+              month = -1;
+            } else if (season != -1) {
+              season = -1;
+            } else if (year != -1) {
+              year = -1;
             } else {
               return true;
             }
