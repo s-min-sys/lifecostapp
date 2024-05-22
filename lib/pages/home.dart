@@ -334,23 +334,22 @@ class _HomePageState extends State<HomePage> {
 
   Widget title() {
     if (widget.online) {
-      return const Text('生活消费');
-    }
-
-    return Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-      const Text('生活消费'),
-      const Text(' 离线模式',
+      return const Text('在线模式',
           style: TextStyle(
             fontSize: 12,
             color: Colors.blueGrey,
-          )),
-      const SizedBox(width: 20),
-      ElevatedButton(
-          onPressed: () {
-            Share.naviToLogin(context);
-          },
-          child: const Text('转在线'))
-    ]);
+          ));
+    }
+
+    return TextButton(
+        onPressed: () {
+          Share.naviToLogin(context);
+        },
+        child: const Text(' 离线模式',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.blueGrey,
+            )));
   }
 
   Widget recordIteWithWrapper(int index) {
@@ -419,7 +418,29 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: title(),
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text('生活消费'),
+            const SizedBox(
+              width: 4,
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  title(),
+                  Text(
+                    Global.getServerURL(),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       onDrawerChanged: (bool isOpened) {
         if (!isOpened) {

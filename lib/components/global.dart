@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lifecostapp/components/model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -99,5 +100,11 @@ class Global {
 
   static List<String>? getLastRecordToSelectedIDs() {
     return gSP?.getStringList('lastRecordToSelectedIDs');
+  }
+
+  static String getServerURL() {
+    return Global.devMode
+        ? dotenv.env['SERVER_DOMAIN_DEV']!
+        : dotenv.env['SERVER_DOMAIN']!;
   }
 }
